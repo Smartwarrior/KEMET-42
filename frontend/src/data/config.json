@@ -1,0 +1,44 @@
+{
+  "initialState": {
+    "day": 1,
+    "budget": 1000,
+    "crew": 4,
+    "resources": {
+      "o2": 80,
+      "energy": 80,
+      "food": 80,
+      "protection": 70
+    },
+    "modules": {
+      "solar": 1,
+      "moxie": 0,
+      "greenhouse": 0,
+      "shield": 0
+    },
+    "damagedModules": [],
+    "maxSols": 30
+  },
+  "consumptions": {
+    "o2": 9,
+    "energy": 5,
+    "food": 6,
+    "protection": 3
+  },
+  "limits": {
+    "minGauge": 0,
+    "maxGauge": 100,
+    "maxActionsPerDay": 2,
+    "maxModulesPerType": 4
+  },
+  "dailyBudgetAdd": 40,
+  "lowEnergyThreshold": 20,
+  "lateGameTensionCoefficient": 1.6,
+  "lateGameStartDay": 16,
+  "eventProbability": 0.5,
+  "eventStartDay": 3,
+  "ranks": {
+    "cadet": 300,
+    "explorer": 500,
+    "pilot": 700
+  }
+}

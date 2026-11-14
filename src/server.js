@@ -60,20 +60,25 @@ let currentMission = {
 // 2. ROUTE : PHASE 1 - BRIEFING D'EMBARQUEMENT AU SOL
 // ====================================================================
 app.get('/api/mission/briefing', (req, res) => {
+  const cargoList = [
+    { id: "cargo_kilopower", name: "Mini-Réacteur Nucléaire Kilopower", massKg: 1500, benefit: "Énergie continue sans soleil", description: "Énergie continue sans soleil" },
+    { id: "cargo_greenhouse", name: "Dôme Serre Hydroponique (Veggie)", massKg: 800, benefit: "+8 kg de nourriture fraîche par jour", description: "+8 kg de nourriture fraîche par jour" },
+    { id: "cargo_extra_o2", name: "Réserves d'Oxygène Cryogénique", massKg: 500, benefit: "+150 kg d'O2 de sécurité", description: "+150 kg d'O2 de sécurité" }
+  ];
+  const destList = [
+    { id: "MOON", name: "Lune - Pôle Sud (Programme Artemis)", label: "Lune - Pôle Sud (Programme Artemis)", description: DESTINATIONS.MOON.mainThreat, data: DESTINATIONS.MOON },
+    { id: "MARS", name: "Mars - Cratère Jezero (Mission Kemet-42)", label: "Mars - Cratère Jezero (Mission Kemet-42)", description: DESTINATIONS.MARS.mainThreat, data: DESTINATIONS.MARS }
+  ];
+
   res.json({
     success: true,
     title: "Centre Spatial - Préparation de l'Équipage KEMET-42",
     instructions: "Cadet, avant d'embarquer dans la navette, configurez votre cargaison et choisissez votre destination finale.",
     crewCapacity: 4,
-    destinationsAvailable: [
-      { id: "MOON", label: "Lune - Pôle Sud (Programme Artemis)", data: DESTINATIONS.MOON },
-      { id: "MARS", label: "Mars - Cratère Jezero (Mission Kemet-42)", data: DESTINATIONS.MARS }
-    ],
-    cargoOptions: [
-      { id: "cargo_kilopower", name: "Mini-Réacteur Nucléaire Kilopower", massKg: 1500, benefit: "Énergie continue sans soleil" },
-      { id: "cargo_greenhouse", name: "Dôme Serre Hydroponique (Veggie)", massKg: 800, benefit: "+8 kg de nourriture fraîche par jour" },
-      { id: "cargo_extra_o2", name: "Réserves d'Oxygène Cryogénique", massKg: 500, benefit: "+150 kg d'O2 de sécurité" }
-    ]
+    destinations: destList,
+    destinationsAvailable: destList,
+    cargo: cargoList,
+    cargoOptions: cargoList
   });
 });
 
@@ -112,7 +117,17 @@ app.post('/api/mission/launch', (req, res) => {
 app.get('/api/mission/status', (req, res) => {
   res.json({
     success: true,
+    status: currentMission,
     data: currentMission,
+    sol: currentMission.solDay,
+    day: currentMission.solDay,
+    oxygenKg: currentMission.oxygenKg,
+    waterLiters: currentMission.waterLiters,
+    foodKg: currentMission.foodKg,
+    powerKwh: currentMission.powerKwh,
+    radiationShield: currentMission.radiationShield,
+    gameOver: currentMission.phase === "FAILED",
+    over: currentMission.phase === "FAILED",
     nasa_standards: {
       o2_daily_rate: "0.8 kg/pers/jour",
       water_daily_rate: "2.5 L/pers/jour (recyclé à 98%)",
@@ -169,8 +184,11 @@ app.post('/api/mission/next-day', (req, res) => {
   res.json({
     success: true,
     sol: currentMission.solDay,
+    day: currentMission.solDay,
     consumed: { o2: o2Used, water: waterUsed, food: foodUsed },
-    mission: currentMission
+    mission: currentMission,
+    status: currentMission,
+    alerts: currentMission.activeAlert ? [currentMission.activeAlert] : []
   });
 });
 

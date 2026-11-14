@@ -1,0 +1,90 @@
+[
+  {
+    "id": "build_solar",
+    "type": "build",
+    "moduleType": "solar",
+    "cost": 120,
+    "name": { "fr": "Panneau solaire", "en": "Solar Panel" },
+    "description": { "fr": "+5 énergie / jour (réduit de 50% sous tempête de poussière)", "en": "+5 energy / day (halved during dust storm)" },
+    "icon": "solar"
+  },
+  {
+    "id": "build_moxie",
+    "type": "build",
+    "moduleType": "moxie",
+    "cost": 150,
+    "name": { "fr": "Générateur d'oxygène", "en": "Oxygen Generator" },
+    "description": { "fr": "+5 oxygène / jour, consomme 2 énergie", "en": "+5 oxygen / day, consumes 2 energy" },
+    "icon": "o2"
+  },
+  {
+    "id": "build_greenhouse",
+    "type": "build",
+    "moduleType": "greenhouse",
+    "cost": 130,
+    "name": { "fr": "Serre hydroponique", "en": "Hydroponic Greenhouse" },
+    "description": { "fr": "+4 nourriture / jour, consomme 1 énergie", "en": "+4 food / day, consumes 1 energy" },
+    "icon": "food"
+  },
+  {
+    "id": "build_shield",
+    "type": "build",
+    "moduleType": "shield",
+    "cost": 140,
+    "name": { "fr": "Blindage anti-radiations", "en": "Radiation Shield" },
+    "description": { "fr": "+3 protection / jour, atténue les tempêtes solaires de 25%", "en": "+3 protection / day, reduces solar storm damage by 25%" },
+    "icon": "shield"
+  },
+  {
+    "id": "emergency_o2",
+    "type": "emergency",
+    "target": "o2",
+    "cost": 60,
+    "name": { "fr": "Réserve d'oxygène", "en": "Emergency Oxygen" },
+    "description": { "fr": "+20 à la jauge d'oxygène immédiatement", "en": "+20 to oxygen gauge immediately" },
+    "icon": "emergency_o2"
+  },
+  {
+    "id": "emergency_energy",
+    "type": "emergency",
+    "target": "energy",
+    "cost": 60,
+    "name": { "fr": "Batterie de secours", "en": "Backup Battery" },
+    "description": { "fr": "+20 à la jauge d'énergie immédiatement", "en": "+20 to energy gauge immediately" },
+    "icon": "emergency_energy"
+  },
+  {
+    "id": "emergency_food",
+    "type": "emergency",
+    "target": "food",
+    "cost": 60,
+    "name": { "fr": "Rations d'urgence", "en": "Emergency Rations" },
+    "description": { "fr": "+20 à la jauge de nourriture immédiatement", "en": "+20 to food gauge immediately" },
+    "icon": "emergency_food"
+  },
+  {
+    "id": "emergency_protection",
+    "type": "emergency",
+    "target": "protection",
+    "cost": 60,
+    "name": { "fr": "Renfort de bouclier", "en": "Shield Reinforcement" },
+    "description": { "fr": "+20 à la jauge de protection immédiatement", "en": "+20 to protection gauge immediately" },
+    "icon": "emergency_shield"
+  },
+  {
+    "id": "repair",
+    "type": "repair",
+    "cost": 50,
+    "name": { "fr": "Réparation des modules", "en": "Repair Modules" },
+    "description": { "fr": "Répare les avaries de modules et redonne +5 énergie", "en": "Repairs damaged modules and restores +5 energy" },
+    "icon": "repair"
+  },
+  {
+    "id": "transmit",
+    "type": "science",
+    "cost": 0,
+    "name": { "fr": "Transmettre les données", "en": "Transmit Data" },
+    "description": { "fr": "+30 crédits reçus de la Terre pour la mission scientifique", "en": "+30 credits received from Earth for scientific telemetry" },
+    "icon": "transmit"
+  }
+]

@@ -1,0 +1,243 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import * as THREE from "three";
+import { useCtrl, useGame } from "../game/useStore.js";
+import { RES, ACT_ICON, makeT, L } from "./strings.js";
+import { rt } from "../world/sim.js";
+import { CREW, CALLSIGN_COLORS, HAZARDS } from "../game/layout.js";
+import { focusCrew } from "../world/interact.js";
+import { audio } from "./audio.js";
+
+export const useT = () => { const lang = useGame((s) => s.lang); return useMemo(() => makeT(lang), [lang]); };
+
+/** Prévision quotidienne : mêmes formules que le moteur (educatif : on voit POURQUOI une jauge baisse). */
+export function forecast(game, cfg) {
+  const m = game.modules, late = game.day >= (cfg.lateGameStartDay ?? 20) ? cfg.lateGameTensionCoefficient : 1, dust = (game.status?.dust || 0) > 0 ? 0.5 : 1, eff = game.resources.energy < 20 ? 0.5 : 1, cr = game.crew / 4, c = cfg.consumptions;
+  return {
+    energy: 5 * m.solar * dust - c.energy * late - 2 * m.moxie - m.greenhouse,
+    o2: 5 * m.moxie * eff - c.o2 * cr * late,
+    food: 4 * m.greenhouse * eff - c.food * cr * late,
+    protection: 3 * m.shield - c.protection * late,
+  };
+}
+
+function TopBar() {
+  const c = useCtrl(), t = useT(); const game = useGame((s) => s.game), phase = useGame((s) => s.phase), plan = useGame((s) => s.plan);
+  const spent = c.planCost(plan), life = useGame((s) => s.life), delay = useGame((s) => s.commDelayMin), pending = useGame((s) => s.pendingTransmit);
+  return (
+    <header className="topbar">
+      <div className="brand"><span className="planet">🪐</span><b>KEMET-42</b></div>
+      <div className="solbox">
+        <div className="sol"><small>{t("sol")}</small> <b>{Math.min(game.day, 30)}</b><span>/30</span></div>
+        <div className="pips">{Array.from({ length: 30 }, (_, i) => <i key={i} className={i + 1 < game.day ? "done" : i + 1 === game.day ? "now" : ""} />)}</div>
+      </div>
+      <div className="stats">
+        <div className="signal" title={t("signalEarth")} style={{ fontSize: 12, opacity: 0.9, marginRight: 8 }}>
+          📡 {t("signalEarth")} · {t("signalDelay", { n: delay || 14 })}
+          {pending ? <small style={{ display: "block", color: "#ffd24a" }}>{t("signalWaiting")}</small> : null}
+        </div>
+        <div className="lifebox" title={t("lifeLbl")}><span>❤️</span><div className="lifebar"><i style={{ width: life + "%" }} className={life < 30 ? "crit" : life < 60 ? "warn" : ""} /></div><b>{life}</b></div>
+        <div className="credits" title={t("credits")}>🪙 <b>{game.budget - spent}</b> <small>{spent ? `(−${spent})` : t("credits")}</small></div>
+      </div>
+      <div className="tools">
+        <button className="icon" onClick={() => { audio.click(); document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.(); }} aria-label={t("fullscreen")} title={t("fullscreen")}>⛶</button>
+        <button className="icon" onClick={() => c.store.set({ settings: true })} aria-label={t("settings")}>⚙️</button>
+      </div>
+    </header>
+  );
+}
+
+function ServerGauges() {
+  const srv = useGame((s) => s.srv), base = useGame((s) => s.srvBase), lang = useGame((s) => s.lang), day = useGame((s) => s.game.day);
+  if (!srv) return null; const fr = lang === "fr";
+  const cards = [
+    ["🫁", fr ? "Support de vie" : "Life support", `${srv.oxygenKg ?? "—"} kg O₂ · ${srv.waterLiters ?? "—"} L`, Math.min(100 * (srv.oxygenKg ?? 0) / (base?.oxygenKg || 1), 100 * (srv.waterLiters ?? 0) / (base?.waterLiters || 1)), "#5ad6ff"],
+    ["🛡️", fr ? "Protection radiations" : "Radiation shield", `${srv.radiationShield ?? "—"} %`, srv.radiationShield ?? 0, "#b58cff"],
+    ["⚡", fr ? "Énergie" : "Power", `${srv.powerKwh ?? "—"} %`, srv.powerKwh ?? 0, "#ffd24a"],
+    ["🌱", fr ? "Nourriture" : "Food", `${srv.foodKg ?? "—"} kg`, 100 * (srv.foodKg ?? 0) / (base?.foodKg || 1), "#7bdc6a"],
+  ];
+  return (
+    <aside className="gauges" aria-label="status">
+      {cards.map(([ic, name, val, pct, col]) => { const v = Math.max(0, Math.min(100, Math.round(pct))), cls = v < 20 ? "crit" : v < 40 ? "warn" : ""; return (
+        <div key={name} className={"gauge " + cls} style={{ "--c": col }}><div className="g-head"><span className="g-ic">{ic}</span><span className="g-name">{name}</span><b className="g-val" style={{ fontSize: 13 }}>{val}</b></div><div className="bar"><i style={{ width: v + "%" }} /></div></div>); })}
+      <div className="mut" style={{ fontSize: 11 }}>{fr ? "Sol" : "Sol"} {day} · backend KEMET-42</div>
+    </aside>
+  );
+}
+
+function Gauges() {
+  const c = useCtrl(), t = useT(); const game = useGame((s) => s.game), delta = useGame((s) => s.lastDelta), sm = useGame((s) => s.serverMode);
+  if (sm) return <ServerGauges />;
+  const f = forecast(game, c.data.config);
+  return (
+    <aside className="gauges" aria-label={t("hudRes")}>
+      {Object.entries(RES).map(([k, r]) => {
+        const v = game.resources[k], d = f[k], days = d < 0 ? Math.floor(v / -d) : null, cls = v < 20 ? "crit" : v < 40 ? "warn" : "";
+        return (
+          <div key={k} className={"gauge " + cls} style={{ "--c": r.color }}>
+            <div className="g-head"><span className="g-ic">{r.icon}</span><span className="g-name">{t(r.key)}</span><b className="g-val">{v}<small>%</small></b></div>
+            <div className="bar"><i style={{ width: v + "%" }} /><u style={{ left: Math.max(0, v + Math.round(d)) + "%" }} /></div>
+            <div className="g-foot"><span className={d >= 0 ? "up" : "down"}>{d >= 0 ? "▲" : "▼"} {d > 0 ? "+" : ""}{Math.round(d)}/{L({ fr: "j", en: "d" }, c.store.get().lang)}</span>{days !== null && days < 9 && <span className="eta">≈ {days} {L({ fr: "jours", en: "days" }, c.store.get().lang)}</span>}</div>
+          </div>
+        );
+      })}
+    </aside>
+  );
+}
+
+function Helmet({ i, size = 40, dead }) {
+  const cr = i === 4 ? { skin: "#d9a066", pack: CALLSIGN_COLORS[useGame((s) => s.callsign)] || "#E2552B" } : CREW[i];
+  return (
+    <svg className={"helmet" + (dead ? " dead" : "")} width={size} height={size} viewBox="0 0 48 48" aria-hidden>
+      <circle cx="24" cy="24" r="23" fill="#1c2236" /><path d="M6 44c2-9 9-13 18-13s16 4 18 13z" fill="#eef1f8" /><rect x="3" y="26" width="9" height="16" rx="3" fill={cr.pack} />
+      <circle cx="24" cy="21" r="14" fill="#f4f6fb" /><ellipse cx="24" cy="22" rx="10.5" ry="9.5" fill="#241a0e" opacity=".85" /><ellipse cx="24" cy="22.5" rx="8" ry="7.2" fill={cr.skin} />
+      <circle cx="21" cy="21.5" r="1.1" fill="#10131c" /><circle cx="27" cy="21.5" r="1.1" fill="#10131c" /><path d="M21.2 25.6q2.8 2 5.6 0" stroke="#10131c" strokeWidth="1.1" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CrewPanel() {
+  const c = useCtrl(), t = useT(); const game = useGame((s) => s.game), sel = useGame((s) => s.crewSel), callsign = useGame((s) => s.callsign);
+  return (
+    <aside className="crew" aria-label={t("hudCrew")}>
+      <div className="crew-card cmd" style={{ "--c": CALLSIGN_COLORS[callsign] }}><Helmet i={4} /><div><b>{t("commander")} {callsign}</b><small>{t("you")}</small></div></div>
+      {CREW.map((m, i) => {
+        const alive = i < game.crew, v = game.resources[m.role], st = !alive ? "crewStatusLost" : v >= 50 ? "crewStatusGood" : v >= 25 ? "crewStatusWarn" : "crewStatusCrit";
+        return (
+          <button key={m.name} className={"crew-card " + (sel === i ? "sel " : "") + (!alive ? "lost" : v < 25 ? "crit" : v < 50 ? "warn" : "")} style={{ "--c": RES[m.role].color }} onClick={() => { audio.click(); focusCrew(c, i); }} disabled={!alive}>
+            <Helmet i={i} dead={!alive} /><div><b>{m.name}</b><small>{t("crewRole" + i)}</small></div><span className="st">{RES[m.role].icon} {t(st)}</span>
+          </button>
+        );
+      })}
+    </aside>
+  );
+}
+
+function ServerDock() {
+  const c = useCtrl(); const phase = useGame((s) => s.phase), lang = useGame((s) => s.lang), err = useGame((s) => s.srvError);
+  if (phase !== "plan") return null;
+  return (<footer className="dock"><div className="plan">{err === "next" && <small>⚠ {lang === "fr" ? "Serveur injoignable" : "Server unreachable"}</small>}
+    <button className="go" disabled={phase !== "plan"} onClick={() => { audio.unlock(); audio.ok(); c.nextDayServer(); }}>{lang === "fr" ? "Sol suivant" : "Next sol"} ▶</button></div></footer>);
+}
+
+function Dock() {
+  const c = useCtrl(), t = useT(); const sm = useGame((s) => s.serverMode);
+  if (sm) return <ServerDock />; const lang = useGame((s) => s.lang), game = useGame((s) => s.game), plan = useGame((s) => s.plan), placing = useGame((s) => s.placing), phase = useGame((s) => s.phase), built = useGame((s) => s.built);
+  const locked = phase !== "plan"; const groups = [["grpBuild", "build"], ["grpUrgent", "emergency"], ["grpOther", null]];
+  const countIn = (id) => plan.filter((p) => p.id === id).length;
+  const click = (a) => { audio.click(); const r = c.beginPlacing(a.id); if (r && !r.ok) audio.error(); };
+  return (
+    <footer className={"dock" + (locked ? " locked" : "")}>
+      <div className="plan">
+        <div className="plan-slots">{[0, 1].map((i) => { const p = plan[i], d = p && c.defOf(p.id); return (
+          <div key={i} className={"slot" + (p ? " full" : "")}>{p ? (<><span>{ACT_ICON[p.id]}</span><b>{L(d.name, lang)}</b><em>{d.cost ? `−${d.cost}` : t("free0")}</em><button onClick={() => { audio.click(); c.removePlan(i); }} aria-label={t("cancel")}>✕</button></>) : <small>{t("planSlot", { n: i + 1 })} · {t("planEmpty")}</small>}</div>); })}</div>
+        <button className="go" disabled={locked} onClick={() => { audio.unlock(); audio.ok(); c.endDay(); }}>{plan.length ? t("launchDay") : t("endDay")} ▶</button>
+      </div>
+      <div className="cards" role="list">
+        {groups.map(([lab, type]) => (
+          <div className="grp" key={lab}><small>{t(lab)}</small><div className="row">
+            {c.data.actions.filter((a) => (type ? a.type === type : a.type !== "build" && a.type !== "emergency")).map((a) => {
+              const chk = c.canAdd(a.id), n = countIn(a.id), mod = a.moduleType ? (built[a.moduleType] || []).length : 0;
+              return (
+                <button key={a.id} role="listitem" className={"card" + (n ? " picked" : "") + (!chk.ok && !n ? " off" : "") + (placing === a.id ? " placing" : "")} onClick={() => click(a)} disabled={locked} title={L(a.description, lang)}>
+                  <span className="ic">{ACT_ICON[a.id]}</span><b>{L(a.name, lang)}</b><em>{a.cost ? `🪙 ${a.cost}` : t("free0")}</em>
+                  {a.moduleType && <i className="lvl">{mod}/4</i>}{n > 0 && <i className="badge">{n}</i>}
+                  <span className="tip">{L(a.description, lang)}{!chk.ok && !n ? ` — ${t(chk.reason)}` : ""}</span>
+                </button>);
+            })}
+          </div></div>))}
+      </div>
+    </footer>
+  );
+}
+
+function PlaceBanner() {
+  const c = useCtrl(), t = useT(); const placing = useGame((s) => s.placing), lang = useGame((s) => s.lang);
+  if (!placing) return null; const d = c.defOf(placing);
+  return <div className="banner place"><span>{ACT_ICON[placing]} <b>{L(d.name, lang)}</b> — {t("placeHint")}</span><button onClick={() => { audio.ok(); c.autoPlace(); }}>{t("placeAuto")}</button><button className="ghost" onClick={() => { audio.click(); c.cancelPlacing(); }}>{t("cancel")}</button></div>;
+}
+
+function CamButtons() {
+  const t = useT(); const [follow, setFollow] = useState(true);
+  return (
+    <div className="cambtns">
+      <button onClick={() => { audio.click(); rt.cam.follow = !rt.cam.follow; setFollow(rt.cam.follow); }} className={follow ? "on" : ""} title={t("follow")}>🎯<small>{follow ? t("follow") : t("free")}</small></button>
+      <button onClick={() => { rt.cam.follow = true; setFollow(true); rt.cam.dist = 19; rt.cam.pol = 1.02; }} title={t("recenter")}>⌖</button>
+      <button onClick={() => (rt.cam.dist = Math.max(9, rt.cam.dist * 0.8))} title={t("zoomIn")}>＋</button>
+      <button onClick={() => (rt.cam.dist = Math.min(60, rt.cam.dist * 1.25))} title={t("zoomOut")}>－</button>
+    </div>
+  );
+}
+
+function Joystick() {
+  const base = useRef(), thumb = useRef(); const [coarse, setCoarse] = useState(false);
+  useEffect(() => { setCoarse(window.matchMedia?.("(pointer: coarse)").matches || "ontouchstart" in window); }, []);
+  useEffect(() => {
+    if (!coarse || !base.current) return; const el = base.current; let id = null;
+    const set = (e) => { const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2; let dx = (e.clientX - cx) / (r.width / 2), dy = (e.clientY - cy) / (r.height / 2); const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; } rt.cmd.x = Math.abs(dx) < 0.12 ? 0 : dx; rt.cmd.y = Math.abs(dy) < 0.12 ? 0 : dy; rt.cmd.run = m > 0.92; thumb.current.style.transform = `translate(${dx * 34}px, ${dy * 34}px)`; };
+    const down = (e) => { id = e.pointerId; el.setPointerCapture(id); rt.joy = true; rt.cam.intro = false; set(e); e.stopPropagation(); };
+    const move = (e) => { if (e.pointerId === id) set(e); };
+    const up = (e) => { if (e.pointerId !== id) return; id = null; rt.joy = false; rt.cmd.x = rt.cmd.y = 0; rt.cmd.run = false; thumb.current.style.transform = ""; };
+    el.addEventListener("pointerdown", down); el.addEventListener("pointermove", move); el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+    return () => { el.removeEventListener("pointerdown", down); el.removeEventListener("pointermove", move); el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up); };
+  }, [coarse]);
+  if (!coarse) return null;
+  return <div className="joy" ref={base}><div className="joy-thumb" ref={thumb} /></div>;
+}
+
+/** Étiquettes 3D → 2D : noms, bulles, balise d'intervention (avec flèche hors-écran). Mises à jour sans re-rendu React. */
+function Labels() {
+  const c = useCtrl(), t = useT(); const root = useRef();
+  useEffect(() => {
+    let raf; const v = new THREE.Vector3(); let last = "";
+    const loop = () => {
+      raf = requestAnimationFrame(loop); const cam = rt.camObj, el = root.current; if (!cam || !el) return; const W = innerWidth, H = innerHeight; cam.updateMatrixWorld();
+      const phase = c.store.get().phase;
+      for (let i = 0; i < 5; i++) {
+        const e = rt.ents[i], tag = el.children[i]; if (!e || !tag) continue;
+        v.set(e.x, e.y + 2.45, e.z).project(cam);
+        const vis = e.alive && !e.hidden && e.fade > 0.5 && v.z < 1 && phase !== "intro" && phase !== "briefing" && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
+        if (!vis) { tag.style.display = "none"; continue; } tag.style.display = "";
+        tag.style.transform = `translate(${((v.x * 0.5 + 0.5) * W).toFixed(1)}px, ${((-v.y * 0.5 + 0.5) * H).toFixed(1)}px) translate(-50%, -100%)`;
+        const say = tag.lastChild; if (say.textContent !== (e.say || "")) say.textContent = e.say || ""; say.style.display = e.say ? "block" : "none";
+      }
+      const hz = el.children[5], h = rt.hazard;
+      if (h && h.pos && h.bonus && !h.reached && phase === "accident") {
+        const c4 = rt.ents[4], dist = Math.hypot(c4.x - h.pos[0], c4.z - h.pos[1]);
+        v.set(h.pos[0], 3.2, h.pos[1]).project(cam); let x = v.x, y = v.y; const behind = v.z > 1; if (behind) { x = -x; y = -y; }
+        const off = behind || Math.abs(x) > 0.88 || Math.abs(y) > 0.8; if (off) { const m = Math.max(Math.abs(x) / 0.88, Math.abs(y) / 0.8) || 1; x /= m; y /= m; }
+        hz.style.display = ""; hz.style.transform = `translate(${((x * 0.5 + 0.5) * W).toFixed(1)}px, ${((-y * 0.5 + 0.5) * H).toFixed(1)}px) translate(-50%, -50%)`;
+        const key = h.id + Math.round(dist) + off + c.store.get().lang; if (key !== last) { last = key; hz.querySelector("span").textContent = `${t(HAZARDS[h.id].label)} · ${Math.round(dist)} ${t("meters")}`; }
+        const arrow = hz.querySelector("i"); arrow.style.display = off ? "" : "none"; if (off) arrow.style.transform = `rotate(${Math.atan2(-y, x)}rad)`;
+      } else hz.style.display = "none";
+    };
+    loop(); return () => cancelAnimationFrame(raf);
+  }, [c, t]);
+  const callsign = useGame((s) => s.callsign);
+  return (
+    <div className="labels" ref={root} aria-hidden>
+      {CREW.map((m) => <div key={m.name} className="tag"><b style={{ color: "#fff" }}>{m.name}</b><div className="say" /></div>)}
+      <div className="tag cmdtag" style={{ "--c": CALLSIGN_COLORS[callsign] }}><b>▼ {t("you")}</b><div className="say" /></div>
+      <div className="hzlabel" style={{ display: "none" }}><i>➤</i><span /></div>
+    </div>
+  );
+}
+
+function Toast() {
+  const c = useCtrl(), t = useT(); const toast = useGame((s) => s.toast);
+  useEffect(() => { if (!toast) return; audio.error(); const id = setTimeout(() => c.clearToast(), 2200); return () => clearTimeout(id); }, [toast, c]);
+  return toast ? <div className="toast">{t(toast.key)}</div> : null;
+}
+
+export function HUD() {
+  const phase = useGame((s) => s.phase); const t = useT();
+  const live = ["plan", "execute", "accident", "resolve", "summary", "fact", "quiz"].includes(phase);
+  if (!live) return null;
+  return (
+    <div className="hud">
+      <TopBar /><Gauges /><CrewPanel /><PlaceBanner /><CamButtons /><Joystick /><Labels /><Toast />
+      <div className="controls">{t("controls")}</div>
+      <Dock />
+    </div>
+  );
+}
+export { Helmet };

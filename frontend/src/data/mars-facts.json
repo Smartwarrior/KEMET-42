@@ -1,0 +1,121 @@
+[
+  {
+    "id": "dust_light",
+    "text": {
+      "fr": "Les tempêtes martiennes soulèvent de fines particules d'oxyde de fer qui obscurcissent le ciel pendant plusieurs semaines. L'ensoleillement au sol peut chuter de plus de 50%, comme l'a mesuré le rover Opportunity.",
+      "en": "Martian dust storms loft fine iron oxide particles that dim the sky for weeks. Surface sunlight can drop by over 50%, as documented by the Opportunity rover."
+    },
+    "value": 50,
+    "unit": "%",
+    "used_for": {
+      "fr": "Règle la baisse de production solaire à 50% pendant une tempête de poussière",
+      "en": "Sets the solar array production reduction to 50% during a dust storm"
+    },
+    "source_name": "NASA Science - Mars Dust Storms",
+    "source_url": "https://science.nasa.gov/mars/facts/",
+    "accessed": "2026-11-13",
+    "verified": true
+  },
+  {
+    "id": "moxie_o2",
+    "text": {
+      "fr": "L'atmosphère martienne contient 95% de dioxyde de carbone. L'instrument MOXIE a démontré qu'il était possible d'en extraire de l'oxygène pur par électrolyse à 800°C directement sur Mars.",
+      "en": "The Martian atmosphere is 95% carbon dioxide. The MOXIE instrument proved that pure oxygen can be extracted via 800°C electrolysis directly on Mars."
+    },
+    "value": 12,
+    "unit": "g/h",
+    "used_for": {
+      "fr": "Modélise le principe de production d'oxygène in-situ de la base",
+      "en": "Models the in-situ oxygen generation system of the Martian habitat"
+    },
+    "source_name": "NASA MOXIE (Perseverance Rover)",
+    "source_url": "https://mars.nasa.gov/mars2020/spacecraft/instruments/moxie/",
+    "accessed": "2026-11-13",
+    "verified": true
+  },
+  {
+    "id": "rad_curiosity",
+    "text": {
+      "fr": "Privée de bouclier magnétique global, la surface de Mars subit les rayons cosmiques et les éruptions solaires. L'instrument RAD de Curiosity a révélé une dose moyenne d'environ 0,67 mSv par jour.",
+      "en": "Lacking a global magnetic field, Mars's surface is bombarded by galactic cosmic rays. Curiosity's RAD detected an average dose of about 0.67 mSv per day."
+    },
+    "value": 0.67,
+    "unit": "mSv/day",
+    "used_for": {
+      "fr": "Justifie l'usure quotidienne du blindage et l'impact des tempêtes de radiations",
+      "en": "Justifies daily shielding degradation and solar radiation storm damage"
+    },
+    "source_name": "NASA Planetary Data System - MSL RAD",
+    "source_url": "https://pds-atmospheres.nmsu.edu/data_and_services/atmospheres_data/MARS/rad.html",
+    "accessed": "2026-11-13",
+    "verified": true
+  },
+  {
+    "id": "aph_greenhouse",
+    "text": {
+      "fr": "Les serres hydroponiques de la NASA (Advanced Plant Habitat) testent la culture en microgravité et circuit fermé. Elles permettent de recycler jusqu'à 98% de l'eau nécessaire aux plantes.",
+      "en": "NASA's Advanced Plant Habitat experiments with closed-loop cultivation in space, recycling up to 98% of the water required for leafy crops and tubers."
+    },
+    "value": 98,
+    "unit": "%",
+    "used_for": {
+      "fr": "Définit la production régulière de nourriture par la serre hydroponique",
+      "en": "Calibrates continuous food yield from the base hydroponic greenhouse"
+    },
+    "source_name": "NASA Advanced Plant Habitat (APH)",
+    "source_url": "https://www.nasa.gov/exploration-systems-and-habitation/advanced-plant-habitat/",
+    "accessed": "2026-11-13",
+    "verified": true
+  },
+  {
+    "id": "ice_subsurface",
+    "text": {
+      "fr": "Les radars satellitaires comme SHARAD sur MRO ont détecté de vastes nappes de glace d'eau pure à quelques décimètres sous la poussière martienne. Cette ressource est vitale pour les futures colonies.",
+      "en": "Orbital radar data from SHARAD on MRO revealed vast slabs of water ice just decimeters beneath Martian regolith, a vital asset for human habitation."
+    },
+    "value": 40,
+    "unit": "cm",
+    "used_for": {
+      "fr": "Règle l'événement de découverte de glace souterraine par l'équipage",
+      "en": "Sets the subsurface water ice discovery event and its resource rewards"
+    },
+    "source_name": "NASA Mars Reconnaissance Orbiter (SHARAD)",
+    "source_url": "https://mars.nasa.gov/mro/mission/instruments/sharad/",
+    "accessed": "2026-11-13",
+    "verified": true
+  },
+  {
+    "id": "mars_sol_duration",
+    "text": {
+      "fr": "Un jour martien (appelé Sol) dure 24 heures, 39 minutes et 35 secondes, soit un peu plus qu'un jour terrestre. La gravité y est de 38% de celle de la Terre.",
+      "en": "A Martian day (called a Sol) lasts 24 hours, 39 minutes, and 35 seconds. Surface gravity on Mars is approximately 38% of Earth's gravity."
+    },
+    "value": 24.66,
+    "unit": "hours",
+    "used_for": {
+      "fr": "Définit l'échelle temporelle des 30 Sols de la simulation",
+      "en": "Defines the 30-Sol simulation timeline and daily crew cadence"
+    },
+    "source_name": "NASA Planetary Fact Sheet - Mars",
+    "source_url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
+    "accessed": "2026-11-13",
+    "verified": true
+  },
+  {
+    "id": "comm_delay",
+    "text": {
+      "fr": "En raison de la distance Terre-Mars (entre 55 et 400 millions de km), les signaux radio mettent entre 3 et 22 minutes à faire le trajet. L'équipage doit être autonome pour décider.",
+      "en": "Because Mars orbits between 55 and 400 million km from Earth, radio communications take 3 to 22 minutes one-way. Crew autonomy is mandatory."
+    },
+    "value": 14,
+    "unit": "minutes",
+    "used_for": {
+      "fr": "Justifie le rôle de commandant autonome sur place face aux imprévus",
+      "en": "Justifies autonomous on-site commander decision-making during crisis events"
+    },
+    "source_name": "NASA Deep Space Network (DSN)",
+    "source_url": "https://eyes.nasa.gov/dsn/dsn.html",
+    "accessed": "2026-11-13",
+    "verified": true
+  }
+]
