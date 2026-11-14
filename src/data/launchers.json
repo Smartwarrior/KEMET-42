@@ -1,0 +1,26 @@
+[
+  {
+    "id": "launcher_small",
+    "name": "Lanceur Léger (Classe Electron)",
+    "maxPayloadKg": 150,
+    "cost": 25,
+    "reliability": 0.95,
+    "description": "Fusée économique pour sondes miniatures et CubeSats vers l'orbite lunaire."
+  },
+  {
+    "id": "launcher_medium",
+    "name": "Lanceur Moyen (Classe Falcon 9)",
+    "maxPayloadKg": 300,
+    "cost": 50,
+    "reliability": 0.99,
+    "description": "Le standard de l'industrie : excellent compromis entre coût et capacité pour les astéroïdes géocroiseurs."
+  },
+  {
+    "id": "launcher_heavy",
+    "name": "Lanceur Lourd (Classe SLS / Falcon Heavy)",
+    "maxPayloadKg": 600,
+    "cost": 90,
+    "reliability": 0.98,
+    "description": "Puissance brute capable d'injecter des sondes massives directement vers Mars avec une marge de carburant élevée."
+  }
+]

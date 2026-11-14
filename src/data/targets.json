@@ -1,0 +1,83 @@
+[
+  {
+    "targetId": "433",
+    "name": "433 Eros",
+    "type": "asteroid",
+    "source": "JPL SBDB / Horizons",
+    "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/sbdb.html",
+    "generatedAt": "2026-11-14T12:00:00Z",
+    "distanceFromEarthKm": 38200000,
+    "missionDifficulty": "medium",
+    "orbit": {
+      "semiMajorAxisAu": 1.458,
+      "eccentricity": 0.223,
+      "inclinationDeg": 10.83,
+      "periodDays": 643
+    },
+    "scienceGoals": [
+      "detection_glace_eau",
+      "composition_minerale",
+      "cartographie_surface"
+    ],
+    "risks": [
+      "champ_gravite_faible",
+      "poussiere_abrasive",
+      "exposition_tempete_solaire"
+    ],
+    "description": "Astéroïde géocroiseur (NEO) de forme allongée, riche en silicates et cible privilégiée pour l'étude des réserves d'eau dans le système solaire interne."
+  },
+  {
+    "targetId": "moon",
+    "name": "Lune (Pôle Sud)",
+    "type": "moon",
+    "source": "NASA Lunar Reconnaissance Orbiter / JPL",
+    "sourceUrl": "https://science.nasa.gov/moon/",
+    "generatedAt": "2026-11-14T12:00:00Z",
+    "distanceFromEarthKm": 384400,
+    "missionDifficulty": "easy",
+    "orbit": {
+      "semiMajorAxisAu": 0.00257,
+      "eccentricity": 0.0549,
+      "inclinationDeg": 5.14,
+      "periodDays": 27.3
+    },
+    "scienceGoals": [
+      "cartographie_glace_cratere",
+      "analyse_regolithe",
+      "relais_communication"
+    ],
+    "risks": [
+      "nuit_lunaire_14_jours",
+      "froid_extreme_moins_170c",
+      "poussiere_electrostatique"
+    ],
+    "description": "Le pôle Sud lunaire abrite des cratères d'obscurité éternelle contenant des dépôts de glace d'eau cruciaux pour les futures missions Artemis."
+  },
+  {
+    "targetId": "mars",
+    "name": "Mars (Cratère Jezero)",
+    "type": "planet",
+    "source": "JPL Mars Horizons / MAVEN",
+    "sourceUrl": "https://mars.nasa.gov/",
+    "generatedAt": "2026-11-14T12:00:00Z",
+    "distanceFromEarthKm": 225000000,
+    "missionDifficulty": "hard",
+    "orbit": {
+      "semiMajorAxisAu": 1.524,
+      "eccentricity": 0.0934,
+      "inclinationDeg": 1.85,
+      "periodDays": 687
+    },
+    "scienceGoals": [
+      "recherche_biosignatures",
+      "analyse_atmosphere_co2",
+      "sondage_glace_souterraine"
+    ],
+    "risks": [
+      "tempetes_globales_poussiere",
+      "delai_communication_20_min",
+      "entree_atmospherique_critique"
+    ],
+    "description": "La planète rouge possède une atmosphère ténue de CO2, des tempêtes de poussière massives et d'anciens lits de rivières préservés."
+  }
+]

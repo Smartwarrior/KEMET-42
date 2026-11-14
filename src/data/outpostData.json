@@ -1,0 +1,105 @@
+{
+  "outpostName": "KEMET-42",
+  "location": "Mars - Cratère Jezero (ou Pôle Sud Lunaire)",
+  "standardsNASA": {
+    "oxygenPerAstronautKgDay": 0.8,
+    "waterPerAstronautLitersDay": 2.5,
+    "foodPerAstronautKgDay": 1.8,
+    "basePowerConsumptionKwhDay": 40.0,
+    "radiationEarthBaselineMsvYear": 2.4,
+    "radiationMarsSurfaceMsvYear": 300.0,
+    "eclssWaterRecyclingEfficiency": 0.98,
+    "sources": [
+      "NASA Human Research Roadmap",
+      "NASA RadLab Database",
+      "ISS Environmental Control and Life Support System (ECLSS)",
+      "NASA Space Technology Mission Directorate (Kilopower & MOXIE)"
+    ]
+  },
+  "modules": [
+    {
+      "id": "life_support",
+      "name": "Module Support de Vie (MOXIE & ECLSS)",
+      "powerDrawKw": 15,
+      "description": "Génère l'oxygène à partir du CO2 martien et recycle 98% des eaux usées.",
+      "critical": true
+    },
+    {
+      "id": "greenhouse",
+      "name": "Serre Hydroponique (NASA Veggie)",
+      "powerDrawKw": 12,
+      "waterDrawLitersDay": 10,
+      "foodProductionKgDay": 8.0,
+      "description": "Cultures de légumes sous LED pour nourrir l'équipage sans dépendre des cargos terrestres.",
+      "critical": false
+    },
+    {
+      "id": "power_plant",
+      "name": "Centrale Énergétique (Solaire + Réacteur Kilopower)",
+      "baseOutputKw": 50,
+      "description": "Fournit l'électricité pour chauffer la base et alimenter les dômes pressurisés.",
+      "critical": true
+    },
+    {
+      "id": "radiation_shelter",
+      "name": "Bunker Blindé Anti-Radiations",
+      "shieldThicknessCm": 50,
+      "protectionFactor": 0.95,
+      "description": "Abri souterrain renforcé au régolithe martien pour protéger les cadets lors des éruptions solaires.",
+      "critical": true
+    }
+  ],
+  "incidents": [
+    {
+      "id": "cme_solar_storm",
+      "title": "Alerte Tempête Solaire (API NASA DONKI)",
+      "type": "radiation",
+      "description": "Une éjection de masse coronale frappe la base. Les radiations montent à 800 mSv.",
+      "dilemma": "Faut-il couper la serre hydroponique pour alimenter le bouclier magnétique à 100% ?",
+      "choices": [
+        {
+          "text": "Activer le bouclier maximal (Coupe l'énergie de la serre)",
+          "effects": { "radiationDamage": 0, "powerDelta": -25, "foodLossKg": 20 }
+        },
+        {
+          "text": "Maintenir la serre (Prendre un risque de radiation modéré)",
+          "effects": { "radiationDamage": 25, "powerDelta": 0, "foodLossKg": 0 }
+        }
+      ]
+    },
+    {
+      "id": "dust_storm_blackout",
+      "title": "Tempête de Poussière Globale",
+      "type": "power",
+      "description": "Un nuage d'oxyde de fer bloque le soleil pendant plusieurs jours comme pour le rover Opportunity.",
+      "dilemma": "La production solaire chute de 80%. Que priorisez-vous ?",
+      "choices": [
+        {
+          "text": "Basculer sur le réacteur nucléaire Kilopower d'urgence",
+          "effects": { "powerDelta": +30, "fuelCost": 15 }
+        },
+        {
+          "text": "Réduire le chauffage des quartiers de vie à 10°C",
+          "effects": { "powerDelta": 0, "crewMorale": -20 }
+        }
+      ]
+    },
+    {
+      "id": "eclss_filter_leak",
+      "title": "Fuite sur le Cycle d'Eau ECLSS",
+      "type": "water",
+      "description": "Une membrane du processeur d'urine est bouchée par des sels de calcium.",
+      "dilemma": "Le taux de recyclage tombe de 98% à 40%.",
+      "choices": [
+        {
+          "text": "Remplacer le filtre immédiatement (Coûte des pièces de rechange)",
+          "effects": { "waterLoss": 5, "spareParts": -1 }
+        },
+        {
+          "text": "Puiser dans les réserves d'urgence d'eau de fonte",
+          "effects": { "waterReserveDelta": -50 }
+        }
+      ]
+    }
+  ]
+}
