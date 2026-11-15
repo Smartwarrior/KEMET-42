@@ -32,17 +32,19 @@ function TopBar() {
         <div className="sol"><small>{t("sol")}</small> <b>{Math.min(game.day, 30)}</b><span>/30</span></div>
         <div className="pips">{Array.from({ length: 30 }, (_, i) => <i key={i} className={i + 1 < game.day ? "done" : i + 1 === game.day ? "now" : ""} />)}</div>
       </div>
-      <div className="stats">
-        <div className="signal" title={t("signalEarth")} style={{ fontSize: 12, opacity: 0.9, marginRight: 8 }}>
-          :i-antenna: {t("signalEarth")} · {t("signalDelay", { n: delay || 14 })}
-          {pending ? <small style={{ display: "block", color: "#ffd24a" }}>{t("signalWaiting")}</small> : null}
+      <div className="topbar-right">
+        <div className="stats">
+          <div className="signal" title={t("signalEarth")}>
+            :i-antenna: <span className="sig-txt">{t("signalDelay", { n: delay || 14 })}</span>
+            {pending ? <small style={{ display: "block", color: "#ffd24a" }}>{t("signalWaiting")}</small> : null}
+          </div>
+          <div className="lifebox" title={t("lifeLbl")}><span>:i-heart:</span><div className="lifebar"><i style={{ width: life + "%" }} className={life < 30 ? "crit" : life < 60 ? "warn" : ""} /></div><b>{life}</b></div>
+          <div className="credits" title={t("credits")}>:i-coin: <b>{game.budget - spent}</b> <small className="cred-lbl">{spent ? `(−${spent})` : ""}</small></div>
         </div>
-        <div className="lifebox" title={t("lifeLbl")}><span>:i-heart:</span><div className="lifebar"><i style={{ width: life + "%" }} className={life < 30 ? "crit" : life < 60 ? "warn" : ""} /></div><b>{life}</b></div>
-        <div className="credits" title={t("credits")}>:i-coin: <b>{game.budget - spent}</b> <small>{spent ? `(−${spent})` : t("credits")}</small></div>
-      </div>
-      <div className="tools">
-        <button className="icon" onClick={() => { audio.click(); document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.(); }} aria-label={t("fullscreen")} title={t("fullscreen")}>:i-expand:</button>
-        <button className="icon" onClick={() => c.store.set({ settings: true })} aria-label={t("settings")}>:i-gear:</button>
+        <div className="tools">
+          <button className="icon" onClick={() => { audio.click(); document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.(); }} aria-label={t("fullscreen")} title={t("fullscreen")}>:i-expand:</button>
+          <button className="icon" onClick={() => c.store.set({ settings: true })} aria-label={t("settings")}>:i-gear:</button>
+        </div>
       </div>
     </header>
   );
@@ -277,9 +279,10 @@ function DailyMissionTracker() {
 
   return (
     <div
+      className="mission-beacon-wrap"
       style={{
         position: "fixed",
-        top: "calc(84px + var(--safe-t, 0px))",
+        top: "calc(82px + var(--safe-t, 0px))",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 15,
@@ -288,7 +291,7 @@ function DailyMissionTracker() {
         alignItems: "center",
         gap: 6,
         pointerEvents: "auto",
-        maxWidth: "min(500px, 92vw)",
+        maxWidth: "min(480px, calc(100vw - 16px))",
       }}
     >
       <div
