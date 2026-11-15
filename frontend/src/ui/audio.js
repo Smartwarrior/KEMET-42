@@ -27,4 +27,7 @@ export const audio = {
   build() { tone(110, 0.5, "sawtooth", 0.07, 40); }, alarm() { tone(880, 0.18, "square", 0.05); setTimeout(() => tone(620, 0.18, "square", 0.05), 200); setTimeout(() => tone(880, 0.18, "square", 0.05), 400); },
   bonus() { [660, 880, 1175].forEach((f, i) => setTimeout(() => tone(f, 0.16, "triangle", 0.07), i * 90)); }, fail() { tone(300, 0.6, "sawtooth", 0.06, 80); }, win() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.3, "triangle", 0.07), i * 140)); },
   error() { tone(180, 0.18, "square", 0.05); },
+  robotBeep() { [740, 880, 1175].forEach((f, i) => setTimeout(() => tone(f, 0.06, "sine", 0.04), i * 65)); },
+  repair() { for (let i = 0; i < 4; i++) setTimeout(() => tone(180 + Math.random() * 80, 0.08, "sawtooth", 0.05), i * 120); },
+  grow() { [440, 554, 659, 880].forEach((f, i) => setTimeout(() => tone(f, 0.12, "triangle", 0.05), i * 100)); },
 };

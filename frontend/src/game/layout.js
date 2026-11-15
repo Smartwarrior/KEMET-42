@@ -26,13 +26,21 @@ export const CREW = [
 ];
 export const CALLSIGN_COLORS = { Aigle: "#E2552B", Comète: "#4FD1C5", Sahel: "#F6C945", Phénix: "#FF5C8A", Boréal: "#9F7AEA", Atlas: "#7BD389" };
 // Lieu de l'accident + intervention directe possible du commandant (bonus).
+// pos = point d'intervention 3D ; crewIdx = spécialiste qui part en réparation.
 export const HAZARDS = {
-  dust_storm: { pos: [-9, 6], bonus: { res: "energy" }, label: "hzDust" },
-  solar_flare: { pos: [0, 5.2], bonus: { res: "protection" }, label: "hzFlare" },   // se mettre à l'abri au sas
-  power_failure: { pos: [14, 0], bonus: { res: "energy" }, label: "hzPower" },
-  oxygen_leak: { pos: [0, -12], bonus: { res: "o2" }, label: "hzLeak" },
-  food_shortage: { pos: [-13, 2], bonus: { res: "food" }, label: "hzFood" },
-  ice_discovery: { pos: [12, 14], bonus: { res: "o2" }, label: "hzIce" },
-  comm_blackout: { pos: [-7.5, -7.5], bonus: { res: "protection" }, label: "hzComm" },
+  dust_storm: { pos: [-9, 6], bonus: { res: "energy" }, label: "hzDust", crewIdx: 1, shelter: true },
+  solar_flare: { pos: [0, 5.2], bonus: { res: "protection" }, label: "hzFlare", crewIdx: 3, shelter: true },
+  power_failure: { pos: [14, 0], bonus: { res: "energy" }, label: "hzPower", crewIdx: 1 },
+  oxygen_leak: { pos: [0, -12], bonus: { res: "o2" }, label: "hzLeak", crewIdx: 0 },
+  food_shortage: { pos: [-13, 2], bonus: { res: "food" }, label: "hzFood", crewIdx: 2 },
+  greenhouse_contam: { pos: [-13, 2], bonus: { res: "food" }, label: "hzFood", crewIdx: 2 },
+  ice_discovery: { pos: [12, 14], bonus: { res: "o2" }, label: "hzIce", crewIdx: 0 },
+  comm_blackout: { pos: [-7.5, -7.5], bonus: { res: "protection" }, label: "hzComm", crewIdx: 3 },
+  life_support_fail: { pos: [0, -10], bonus: { res: "o2" }, label: "hzLeak", crewIdx: 0 },
   calm_sol: { pos: null, bonus: null },
 };
+
+/** Point d'entrée de l'abri (sas) et point intérieur logique pour le mode abri. */
+export const SHELTER_IN = [AIRLOCK[0], AIRLOCK[1] - 0.8];
+export const SHELTER_INSIDE = [0, 1.2];
+

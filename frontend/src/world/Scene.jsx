@@ -5,6 +5,7 @@ import { rt, goTo, fxSoft } from "./sim.js";
 import { SkyAndLight } from "./Sky.jsx";
 import { Terrain } from "./Terrain.jsx";
 import { Habitat, Modules } from "./Base.jsx";
+import { HabitatInterior } from "./HabitatInterior.jsx";
 import { Crew } from "./Crew.jsx";
 import { Weather } from "./Effects.jsx";
 import { CameraRig } from "./CameraRig.jsx";
@@ -51,6 +52,7 @@ function Inner({ ctrl, onLow, quality, env }) {
       <SkyAndLight quality={quality} />
       <Terrain onGround={onGround} env={env} />
       <Habitat />
+      <HabitatInterior />
       <Modules ctrl={ctrl} />
       <Crew ctrl={ctrl} />
       <Weather />

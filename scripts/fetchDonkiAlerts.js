@@ -1,41 +1,40 @@
-// scripts/fetchDonkiAlerts.js - Récupération officielle des tempêtes solaires NASA
-// URL : https://api.nasa.gov/DONKI/
+// scripts/fetchDonkiAlerts.js
+// Wrapper CLI / compat — la logique live est dans src/donki.js
+const { getDonkiSnapshot, donkiToAlert } = require('../src/donki');
 
-export async function getLiveSolarStormAlert() {
-  const today = new Date().toISOString().split('T')[0];
-  const pastDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  
-  const url = `https://api.nasa.gov/DONKI/CME?startDate=${pastDate}&endDate=${today}&api_key=DEMO_KEY`;
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3500); // 3.5s max
-
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.length > 0) {
-        return {
-          source: "NASA Space Weather DONKI API (LIVE)",
-          active: true,
-          alertLevel: "HIGH RADIATION WARNING",
-          details: data[0].note || "Éjection de Masse Coronale détectée par SOHO/STEREO.",
-          time: data[0].startTime
-        };
-      }
-    }
-  } catch (err) {
-    console.warn("Connexion NASA DONKI hors-ligne, utilisation du mode de secours.");
+async function getLiveSolarStormAlert() {
+  const snap = await getDonkiSnapshot();
+  if (!snap || snap.radiationRisk === 'low') {
+    return {
+      source: snap?.source || 'NASA DONKI',
+      active: false,
+      alertLevel: 'QUIET',
+      details: 'Pas d’activité solaire significative sur les 14 derniers jours.',
+      time: new Date().toISOString(),
+      live: !!snap?.live,
+    };
   }
-
-  // Fallback sécurisé : données réelles archivées de la NASA
+  const alert = donkiToAlert(snap, { shielded: false });
   return {
-    source: "NASA DONKI Space Weather (Archive Réelle Validée)",
+    source: snap.source,
     active: true,
-    alertLevel: "ALERTE ÉRUPTION SOLAIRE CLASSE M",
-    details: "Flux de protons énergétiques solaires détecté en approche de KEMET-42. Confinement dans le bunker recommandé.",
-    time: new Date().toISOString()
+    alertLevel: snap.radiationRisk === 'high' ? 'HIGH RADIATION WARNING' : 'ELEVATED SOLAR ACTIVITY',
+    details: alert?.message || snap.summary,
+    time: snap.strongestFlare?.beginTime || snap.fetchedAt || new Date().toISOString(),
+    live: snap.live,
+    classType: snap.strongestFlare?.classType || null,
   };
 }
+
+if (require.main === module) {
+  getLiveSolarStormAlert()
+    .then((a) => {
+      console.log(JSON.stringify(a, null, 2));
+    })
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    });
+}
+
+module.exports = { getLiveSolarStormAlert, getDonkiSnapshot, donkiToAlert };

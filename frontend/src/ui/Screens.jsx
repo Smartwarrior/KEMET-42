@@ -5,14 +5,45 @@ import { RES, EVENT_ICON, MOD_ACTION, ACT_ICON, L } from "./strings.js";
 import { CALLSIGN_COLORS, CREW, HAZARDS } from "../game/layout.js";
 import { rt } from "../world/sim.js";
 import { audio } from "./audio.js";
+import { INCIDENT_CATALOG } from "../data/incidents.js";
+import { novaSpeak, novaLine } from "./novaSpeak.js";
 
 const Btn = ({ children, onClick, kind = "primary", ...p }) => <button className={"btn " + kind} onClick={(e) => { audio.unlock(); audio.click(); onClick && onClick(e); }} {...p}>{children}</button>;
+
+function catalogFor(evId) {
+  return INCIDENT_CATALOG.find((i) => i.id === evId) || null;
+}
 
 export function Intro() {
   const c = useCtrl(), t = useT(); const hasSave = useGame((s) => s.hasSave), lang = useGame((s) => s.lang), best = useGame((s) => s.best);
   return (
     <div className="screen intro">
-      <div className="intro-top"><button className="icon" onClick={() => c.setLang(lang === "fr" ? "en" : "fr")}>{lang === "fr" ? "EN" : "FR"}</button><button className="icon" onClick={() => { c.toggleSound(); }}>{useGame((s) => s.sound) ? "🔊" : "🔇"}</button></div>
+      <div className="intro-top">
+        <div className="voice-choice" aria-label={lang === "fr" ? "Langue de la voix de Nova" : "Nova voice language"}>
+          <span>🤖 {lang === "fr" ? "Voix Nova" : "Nova voice"}</span>
+          <button
+            className={lang === "fr" ? "on" : ""}
+            onClick={() => {
+              c.setLang("fr");
+              novaSpeak(novaLine("langFr", "fr"), "fr");
+            }}
+          >
+            FR
+          </button>
+          <button
+            className={lang === "en" ? "on" : ""}
+            onClick={() => {
+              c.setLang("en");
+              novaSpeak(novaLine("langEn", "en"), "en");
+            }}
+          >
+            EN
+          </button>
+        </div>
+        <button className="icon" onClick={() => { c.toggleSound(); }}>
+          {useGame((s) => s.sound) ? "🔊" : "🔇"}
+        </button>
+      </div>
       <div className="intro-center">
         <div className="eyebrow">NASA SPACE APPS CHALLENGE 2026</div>
         <h1>{t("title")}</h1>
@@ -46,21 +77,88 @@ export function Briefing() {
   );
 }
 
-/** Accident : bannière dramatique, puis choix de réponse ; l'intervention directe se fait en marchant jusqu'à la balise. */
+/** Accident : bannière + protocole + compte à rebours (règle de jeu) + sources NASA. */
 export function Accident() {
   const c = useCtrl(), t = useT(); const lang = useGame((s) => s.lang), ev = useGame((s) => s.pendingEvent), ready = useGame((s) => s.choicesReady), game = useGame((s) => s.game), plan = useGame((s) => s.plan), reached = useGame((s) => s.bonusReached);
-  useEffect(() => { if (ev) { ev.negative ? audio.alarm() : audio.ok(); } }, [ev]);
+  const [shelterOpen, setShelterOpen] = useState(false), [helpOpen, setHelpOpen] = useState(false);
+  const cat = useMemo(() => (ev ? catalogFor(ev.id) : null), [ev]);
+  const [timeLeft, setTimeLeft] = useState(cat?.timeLimitSec || 45);
+  useEffect(() => { if (ev) { ev.negative ? audio.alarm() : audio.ok(); setTimeLeft(cat?.timeLimitSec || 45); } }, [ev, cat]);
+  useEffect(() => {
+    if (!ev || !ready) return;
+    const full =
+      (cat?.explain && (lang === "fr" ? cat.explain.fr : cat.explain.en)) ||
+      (novaLine("incident", lang) +
+        " " +
+        (cat ? (lang === "fr" ? cat.whatToDo?.fr : cat.whatToDo?.en) : ""));
+    novaSpeak(full, lang);
+  }, [ev, ready, lang, cat]);
+  useEffect(() => {
+    if (!ev || !ready) return undefined;
+    const id = setInterval(() => setTimeLeft((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(id);
+  }, [ev, ready]);
   useEffect(() => { if (reached) audio.bonus(); }, [reached]);
   const sm = useGame((s) => s.serverMode);
   if (!ev) return null;
   const hz = HAZARDS[ev.id], res = hz?.bonus ? t(RES[hz.bonus.res].key) : "", funds = game.budget - c.planCost(plan);
+  const fr = lang === "fr";
+  const procedures = {
+    dust_storm: [fr ? "Observer la visibilité et la production solaire" : "Check visibility and solar output", fr ? "Rassembler l’équipage dans l’abri pressurisé" : "Gather crew in the pressurized shelter", fr ? "Réduire la consommation et attendre l’accalmie" : "Cut power use and wait for clearer skies"],
+    solar_flare: [fr ? "Recevoir l’alerte de rayonnement" : "Receive the radiation alert", fr ? "Se réfugier derrière le blindage de l’abri" : "Shelter behind the base shielding", fr ? "Limiter les sorties jusqu’à la fin de l’événement" : "Limit EVAs until the event ends"],
+    power_failure: [fr ? "Isoler le circuit qui a déclenché l’alarme" : "Isolate the circuit that triggered the alarm", fr ? "Envoyer un astronaute au tableau électrique" : "Send an astronaut to the power panel", fr ? "Rétablir l’énergie ou passer en mode économie" : "Restore power or switch to economy mode"],
+    oxygen_leak: [fr ? "Localiser la chute de pression" : "Locate the pressure drop", fr ? "Fermer le sas et colmater le joint" : "Close the airlock and seal the joint", fr ? "Vérifier que le débit d’O₂ revient à la normale" : "Check that O₂ flow returns to normal"],
+    food_shortage: [fr ? "Identifier le bac contaminé" : "Identify the contaminated tray", fr ? "Isoler les plantes et désinfecter la zone" : "Isolate plants and disinfect the area", fr ? "Rééquilibrer les rations et la serre" : "Rebalance rations and the greenhouse"],
+    greenhouse_contam: [fr ? "Identifier le bac contaminé" : "Identify the contaminated tray", fr ? "Isoler et stériliser" : "Isolate and sterilize", fr ? "Vérifier la récolte restante" : "Check remaining harvest"],
+    comm_blackout: [fr ? "Confirmer que la liaison est interrompue" : "Confirm the link is down", fr ? "Basculer sur l’autonomie locale" : "Switch to local autonomy", fr ? "Réessayer l’antenne quand la fenêtre revient" : "Retry the antenna when the window returns"],
+    ice_discovery: [fr ? "Cartographier la glace détectée" : "Map the detected ice", fr ? "Choisir : eau pour la serre ou protection" : "Choose: water for greenhouse or shielding", fr ? "Mesurer le résultat" : "Measure the result"],
+    life_support_fail: [fr ? "Lire l’alarme CO₂" : "Read the CO₂ alarm", fr ? "Remplacer le filtre" : "Replace the filter", fr ? "Vérifier la qualité de l’air" : "Check air quality"],
+    calm_sol: [fr ? "Lire les capteurs du Sol" : "Read Sol sensors", fr ? "Profiter de la fenêtre pour charger ou explorer" : "Use the window to charge or explore", fr ? "Comparer la décision aux ressources" : "Compare the decision to remaining resources"],
+  }[ev.id] || [fr ? "Identifier le signal" : "Identify the signal", fr ? "Choisir une réponse" : "Choose a response", fr ? "Vérifier les conséquences" : "Check the consequences"];
+  const activeStep = reached ? 2 : ready ? 1 : 0;
+  const urgencyRaw = cat?.urgency || (ev.negative ? "high" : "low");
+  const urgency = ({ high: fr ? "urgence élevée" : "high urgency", medium: fr ? "urgence moyenne" : "medium urgency", low: fr ? "urgence faible" : "low urgency" })[urgencyRaw] || urgencyRaw;
+  const evName = (fr ? { dust_storm: "tempête de poussière", solar_flare: "éruption solaire", power_failure: "panne d'énergie", oxygen_leak: "fuite d'oxygène", food_shortage: "pénurie de nourriture", greenhouse_contam: "serre contaminée", comm_blackout: "coupure de communication", ice_discovery: "découverte de glace", life_support_fail: "panne du support de vie", calm_sol: "Sol calme" } : { dust_storm: "dust storm", solar_flare: "solar flare", power_failure: "power failure", oxygen_leak: "oxygen leak", food_shortage: "food shortage", greenhouse_contam: "greenhouse contamination", comm_blackout: "communication blackout", ice_discovery: "ice discovery", life_support_fail: "life support failure", calm_sol: "calm Sol" })[ev.id] || ev.id.replaceAll("_", " ");
   return (
     <div className={"accident" + (ev.negative ? " bad" : " good")}>
-      <div className="acc-banner"><span className="acc-ic">{EVENT_ICON[ev.id]}</span><div><small>{ev.negative ? "⚠ " + t("accident") : "✦ " + t("eventTitle")}</small><p>{L(ev.text, lang)}</p></div></div>
+      <div className="acc-banner"><span className="acc-ic">{EVENT_ICON[ev.id] || "⚠"}</span><div><small>{ev.negative ? "⚠ " + t("accident") : "✦ " + t("eventTitle")} · {urgency}</small><p>{L(ev.text, lang)}</p><div className="incident-type">{evName} · {fr ? "protocole guidé" : "guided protocol"}</div></div>
+        <div className="inc-timer" title={fr ? "Compte à rebours = règle de jeu (pas une durée scientifique réelle)" : "Countdown = game rule (not a real scientific duration)"}>
+          ⏱ {timeLeft}s
+          <small>{fr ? "règle de jeu" : "game rule"}</small>
+        </div>
+      </div>
+      {cat && (
+        <div className="incident-meta">
+          <p><strong>{fr ? "Cause" : "Cause"} :</strong> {L(cat.cause, lang)}</p>
+          {cat.phenomenon && <p><strong>{fr ? "Ce qui se passe" : "What is happening"} :</strong> {L(cat.phenomenon, lang)}</p>}
+          <p><strong>{fr ? "Danger" : "Danger"} :</strong> {L(cat.danger, lang)}</p>
+          <p><strong>{fr ? "À faire" : "What to do"} :</strong> {L(cat.whatToDo, lang)}</p>
+          {cat.source?.url && (
+            <p>
+              <a href={cat.source.url} target="_blank" rel="noreferrer">
+                {cat.source.name || "NASA"} ↗
+              </a>
+              <small style={{ marginLeft: 8, opacity: 0.8 }}>
+                {fr ? "(source officielle NASA)" : "(official NASA source)"}
+              </small>
+            </p>
+          )}
+          {!cat.source && (
+            <p>
+              <small style={{ opacity: 0.75 }}>
+                {fr
+                  ? "Règle de jeu : le chrono et certains effets ne sont pas des données scientifiques."
+                  : "Game rule: the timer and some effects are not scientific data."}
+              </small>
+            </p>
+          )}
+        </div>
+      )}
+      <div className="incident-protocol"><div className="protocol-head"><b>🤖 NOVA</b><span>{fr ? "étape" : "step"} {activeStep + 1}/3</span></div><div className="protocol-steps">{procedures.map((step, i) => <div key={step} className={"protocol-step " + (i === activeStep ? "active" : i < activeStep ? "done" : "")}><i>{i < activeStep ? "✓" : i + 1}</i><span>{step}</span></div>)}</div>{(ev.id === "dust_storm" || ev.id === "solar_flare" || cat?.shelterRequired || cat?.shelterRecommended) && <button className="shelter-btn" onClick={() => { c.enterShelter?.(); setShelterOpen(true); }}>🏠 {fr ? "Voir l’intérieur de l’abri" : "View shelter interior"}</button>}<small className="protocol-note">{fr ? "Le chrono est une règle du jeu. Les infos sur Mars et la Lune viennent de la NASA." : "The timer is a game rule. Facts about Mars and the Moon come from NASA."}</small></div>
       {hz?.bonus && <div className={"bonus" + (reached ? " got" : "")}>{reached ? "✔ " + t("intervened", { res }) : "🎯 " + t("intervene", { res })}</div>}
       {ready && sm && <div className="choices"><div className="choice-row"><button className="choice" onClick={() => { audio.ok(); c.ackAlert(); }}><b>{lang === "fr" ? "Continuer" : "Continue"} ▶</b></button></div></div>}
       {ready && !sm && (
-        <div className="choices"><small>{t("chooseResponse")}</small>
+        <div className="choices"><small>{t("chooseResponse")}</small><button className="coach-help" onClick={() => setHelpOpen((v) => !v)}>🤖 {helpOpen ? (fr ? "Masquer l’aide" : "Hide help") : (fr ? "NOVA, aide-moi" : "NOVA, help me")}</button>{helpOpen && <div className="help-tip">{cat ? (helpOpen && (fr ? `Indice : ressource en jeu = ${(cat.resources || []).join(", ")}. ${L(cat.whatToDo, lang)}` : `Hint: resource at stake = ${(cat.resources || []).join(", ")}. ${L(cat.whatToDo, lang)}`)) : (ev.id === "power_failure" ? (fr ? "Commence par isoler le circuit." : "Start by isolating the circuit.") : fr ? "Protège d’abord l’équipage, puis regarde le coût." : "Protect the crew first, then check the cost.")}</div>}
           <div className="choice-row">{ev.choices.map((ch) => {
             const poor = (ch.cost || 0) > funds && ev.choices.some((o) => !o.cost); const eff = Object.entries(ch.effects || {}).filter(([, v]) => v);
             return (
@@ -72,6 +170,66 @@ export function Accident() {
               </button>);
           })}</div>
         </div>)}
+      {shelterOpen && <ShelterView event={ev} onClose={() => setShelterOpen(false)} />}
+    </div>
+  );
+}
+
+function ShelterView({ event, onClose }) {
+  const c = useCtrl();
+  const lang = useGame((s) => s.lang);
+  const game = useGame((s) => s.game);
+  const fr = lang === "fr";
+  const res = game?.resources || {};
+  const alert = event?.id || "none";
+  const why =
+    alert === "dust_storm"
+      ? (fr ? "La tempete reduit la visibilite et peut couvrir les panneaux. L'equipage reste pressurise a l'interieur." : "The storm cuts visibility and can cover solar panels. The crew stays pressurized inside.")
+      : alert === "solar_flare"
+        ? (fr ? "Une alerte solaire augmente le risque de rayonnement. L'equipage se place derriere le blindage." : "A solar alert raises radiation risk. The crew moves behind the shielding.")
+        : (fr ? "L'equipage utilise l'abri pressurise pendant l'incident." : "The crew uses the pressurized shelter during the incident.");
+
+  function close() {
+    c.exitShelter?.();
+    onClose?.();
+  }
+
+  return (
+    <div className="shelter-view" role="dialog" aria-label={fr ? "Vue interieure de l'abri" : "Shelter interior"}>
+      <div className="shelter-card">
+        <button type="button" className="x" onClick={close} aria-label="close">X</button>
+        <div className="eyebrow">MODULE DE PROTECTION · VUE INTERIEURE</div>
+        <h2>{fr ? "Les astronautes se mettent a l'abri" : "Astronauts take shelter"}</h2>
+        <p className="mut">{why}</p>
+        <div className="shelter-room">
+          <div className="room-label">{fr ? "SAS / DECONTAMINATION" : "AIRLOCK / DECON"}</div>
+          <div className="room-core">
+            <span>A1</span><span>A2</span><span>A3</span><span>A4</span>
+            <b>O2 {res.o2 ?? "—"}% · SHIELD {res.protection ?? "—"}% · PWR {res.energy ?? "—"}%</b>
+          </div>
+          <div className="room-label">{fr ? "ZONE DE VIE PRESSURISEE" : "PRESSURIZED LIVING AREA"}</div>
+        </div>
+        <ul className="shelter-status">
+          <li>{fr ? "Sas" : "Airlock"} — OK</li>
+          <li>{fr ? "Oxygene cabine" : "Cabin oxygen"} — {res.o2 ?? "—"}%</li>
+          <li>{fr ? "Batteries" : "Batteries"} — {res.energy ?? "—"}%</li>
+          <li>{fr ? "Blindage" : "Shielding"} — {res.protection ?? "—"}%</li>
+          <li>{fr ? "Nourriture" : "Food"} — {res.food ?? "—"}%</li>
+          <li>{fr ? "Alerte" : "Alert"} — {String(alert).replaceAll("_", " ")}</li>
+        </ul>
+        <div className="shelter-fact">
+          <b>{fr ? "A retenir" : "Remember"}</b>
+          <span>
+            {fr
+              ? "Un abri pressurise protege contre le vide, la poussiere et une partie du rayonnement. Il ne rend pas une sortie sure pendant une alerte."
+              : "A pressurized shelter protects against vacuum, dust and some radiation. It does not make an EVA safe during an alert."}
+          </span>
+          <a href="https://www.nasa.gov/humans-in-space/space-radiation/" target="_blank" rel="noreferrer">NASA · Space radiation</a>
+        </div>
+        <button type="button" className="btn primary" onClick={close}>
+          {fr ? "Sortir de l'abri / retour protocole" : "Exit shelter / back to protocol"}
+        </button>
+      </div>
     </div>
   );
 }

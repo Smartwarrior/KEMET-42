@@ -17,7 +17,7 @@ const COLORS = { solar: "#6aa0ff", moxie: "#4FD1C5", greenhouse: "#7BD389", shie
 
 /** Habitat central + sas, antenne : le cœur visuel de la base. */
 export function Habitat() {
-  const win = useRef(), lamp = useRef(), beacon = useRef(), airlock = useRef(), light = useRef();
+  const win = useRef(), lamp = useRef(), beacon = useRef(), airlock = useRef(), light = useRef(), shell = useRef();
   const winMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#bdf6ff", emissive: "#7de8ff", emissiveIntensity: 1.4, roughness: 0.2 }), []);
   const beaconMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#ff3b3b", emissive: "#ff2222", emissiveIntensity: 1 }), []);
   const doorMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#ffd9a0", emissive: "#ffb050", emissiveIntensity: 1.1 }), []);
@@ -27,10 +27,13 @@ export function Habitat() {
     beaconMat.emissiveIntensity = w.alert > 0.1 ? (Math.sin(t * 8) > 0 ? 3 : 0.1) : 0.5 + Math.sin(t * 2) * 0.4;
     doorMat.emissiveIntensity = Math.max(0.1, 1.2 * power);
     if (light.current) light.current.intensity = 11 * power * (rt.quality === "low" ? 0.6 : 1);
+    // En mode abri, masquer la coque extérieure pour révéler l'intérieur 3D
+    if (shell.current) shell.current.visible = !rt.shelter;
   });
   return (
     <group>
       <mesh material={M.pad} position-y={0.04} receiveShadow><cylinderGeometry args={[11, 11.6, 0.18, 48]} /></mesh>
+      <group ref={shell}>
       <mesh material={M.dark} position-y={0.14} receiveShadow><cylinderGeometry args={[5.1, 5.3, 0.3, 40]} /></mesh>
       <mesh material={M.hull} position-y={0.3} castShadow receiveShadow><sphereGeometry args={[4.5, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2]} /></mesh>
       <mesh material={winMat} position-y={1.6}><torusGeometry args={[4.26, 0.2, 8, 56]} /></mesh>
@@ -42,6 +45,7 @@ export function Habitat() {
         <mesh material={doorMat} position={[0, 1.0, 1.12]}><boxGeometry args={[1.2, 1.8, 0.05]} /></mesh>
       </group>
       <pointLight ref={light} position={[0, 3.2, 8.5]} color="#ffd9a8" distance={24} decay={1.8} />
+      </group>
       <Antenna />
       {[[-5.5, 7.5], [5.5, 7.5], [-11, 0], [11, 0]].map(([x, z], i) => <Lamp key={i} x={x} z={z} />)}
     </group>

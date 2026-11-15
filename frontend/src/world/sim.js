@@ -8,7 +8,7 @@ export const rt = {
   w: { dust: 0, flare: 0, dark: 0, alert: 0, blight: 0, static: 0, shake: 0, aurora: 0, calm: 0 },
   wT: { dust: 0, dark: 0, alert: 0, blight: 0, static: 0, aurora: 0, calm: 0 },
   tod: 0.14, todTarget: null, env: "mars",
-  ents: [], hazard: null, placing: null, ripple: null, ice: 0, antennaSpin: 0,
+  ents: [], hazard: null, shelter: false, placing: null, ripple: null, ice: 0, antennaSpin: 0,
   labels: { crew: [], cmd: null }, project: null, time: 0, quality: "high", hover: null,
 };
 

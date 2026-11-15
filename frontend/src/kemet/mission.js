@@ -9,8 +9,8 @@ const clamp = (v) => Math.max(0, Math.min(100, Math.round(v)));
 
 export function createMissionClient(base, getToken = () => null) {
   const call = async (path, method = "GET", body) => {
-    const tk = getToken();
-    const r = await fetch(base.replace(/\/$/, "") + "/api/mission" + path, { method, headers: { "Content-Type": "application/json", ...(tk ? { Authorization: "Bearer " + tk } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    const tk = getToken(); let gid = ""; try { gid = localStorage.getItem("kemet_guest") || ""; if (!gid) { gid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem("kemet_guest", gid); } } catch (_) {}
+    const r = await fetch(base.replace(/\/$/, "") + "/api/mission" + path, { method, headers: { "Content-Type": "application/json", ...(gid ? { "X-Guest-Id": gid } : {}), ...(tk ? { Authorization: "Bearer " + tk } : {}) }, body: body ? JSON.stringify(body) : undefined });
     if (!r.ok) throw new Error("http " + r.status);
     return r.status === 204 ? {} : r.json();
   };
@@ -20,6 +20,17 @@ export function createMissionClient(base, getToken = () => null) {
     status: async () => normalizeStatus(await call("/status")),
     nextDay: async () => { const r = await call("/next-day", "POST", {}); return { alerts: alertsFrom(r), raw: r }; },
     reset: () => call("/reset", "POST", {}),
+    // pedagogical extensions
+    startIncident: (p) => call("/incident/start", "POST", p || {}),
+    incidentAction: (p) => call("/incident/action", "POST", p || {}),
+    resolveIncident: (p) => call("/incident/resolve", "POST", p || {}),
+    enterShelter: (p) => call("/shelter/enter", "POST", p || {}),
+    exitShelter: () => call("/shelter/exit", "POST", {}),
+    assistantState: () => call("/assistant-state"),
+    assistantHelp: (level) => call("/assistant-help", "POST", { level }),
+    greenhouseStart: (p) => call("/greenhouse/start", "POST", p || {}),
+    greenhouseAction: (p) => call("/greenhouse/action", "POST", p || {}),
+    scienceSources: () => call("/science-sources"),
   };
 }
 

@@ -8,6 +8,8 @@ import { fetchHorizons } from "../kemet/api.js";
 import { RULES } from "../game/controller.js";
 import { rt } from "../world/sim.js";
 import { audio } from "./audio.js";
+import { LAYERS, SITE_COORDS, tileUrl, toXY, grid } from "../kemet/atlas.js";
+import { novaSpeak, stopNovaSpeak } from "./novaSpeak.js";
 
 const Btn = ({ children, onClick, kind = "primary", ...p }) => <button className={"btn " + kind} onClick={(e) => { audio.unlock(); audio.click(); onClick && onClick(e); }} {...p}>{children}</button>;
 const SrcLink = ({ src, t }) => <a className="srclink" href={src.url} target="_blank" rel="noreferrer">{t("srcLabel")} : {src.name}{src.updated ? ` · ${t("updatedLbl")} ${src.updated}` : ""} ↗</a>;
@@ -124,10 +126,67 @@ function BodyCard({ b, onPick }) {
 }
 export function Destination() {
   const c = useCtrl(), t = useT();
+  const lang = useGame((s) => s.lang);
+  const fr = lang === "fr";
+  const moon = BODIES.moon, mars = BODIES.mars;
+  const fact = (body, keyFr) => {
+    const row = (body.facts || []).find((f) => (f.k?.fr || f.k) === keyFr || (typeof f.k === "string" && f.k.includes(keyFr.slice(0, 6))));
+    if (!row) return "—";
+    return typeof row.v === "string" ? row.v : L(row.v, lang);
+  };
+  const rows = [
+    { label: fr ? "Gravité" : "Gravity", moon: fact(moon, "Gravité à la surface") || "1,62 m/s²", mars: fact(mars, "Gravité à la surface") || "3,71 m/s²" },
+    { label: fr ? "Atmosphère" : "Atmosphere", moon: fact(moon, "Atmosphère") || (fr ? "extrêmement ténue" : "extremely tenuous"), mars: fact(mars, "Atmosphère") || "95 % CO₂" },
+    { label: fr ? "Jour / nuit" : "Day / night", moon: fr ? "~14 j de jour / 14 j de nuit" : "~14 d day / 14 d night", mars: fr ? "Sol ≈ 24 h 40 min" : "Sol ≈ 24 h 40 min" },
+    { label: fr ? "Température" : "Temperature", moon: fact(moon, "Température à l'équateur") || "95–390 K", mars: fr ? "≈ −90 °C à +20 °C (typique)" : "≈ −90 °C to +20 °C (typical)" },
+    { label: fr ? "Distance Terre" : "Distance from Earth", moon: "384 400 km", mars: fr ? "~55–400 millions km" : "~55–400 million km" },
+    { label: fr ? "Délai signal (aller)" : "Signal delay (one way)", moon: "≈ 1,3 s", mars: fr ? "≈ 4–24 min" : "≈ 4–24 min" },
+    { label: fr ? "Risques principaux" : "Main risks", moon: fr ? "Nuit longue, radiations, régolithe" : "Long night, radiation, regolith", mars: fr ? "Tempêtes de poussière, radiations, perchlorates" : "Dust storms, radiation, perchlorates" },
+    { label: fr ? "Glace d'eau" : "Water ice", moon: fr ? "Pôles ombragés (Artemis)" : "Polar shadowed regions (Artemis)", mars: fr ? "Pôles et sous-sol (MRO, Phoenix)" : "Poles and subsurface (MRO, Phoenix)" },
+  ];
   return (
     <div className="screen kemet-step">
       <div className="panel step wide3">
-        <div className="eyebrow">3 / 4 · {t("destTitle")}</div><h2>{t("destTitle")}</h2><p className="mut">{t("destSub")}</p>
+        <div className="eyebrow">3 / 4 · {t("destTitle")}</div>
+        <h2>{t("destTitle")}</h2>
+        <p className="mut">{t("destSub")}</p>
+
+        <div className="dest-compare">
+          <h3>{fr ? "Lune ou Mars ? Regarde les différences" : "Moon or Mars? See the differences"}</h3>
+          <table className="compare-table">
+            <thead>
+              <tr>
+                <th>{fr ? "Critère" : "Criterion"}</th>
+                <th>🌕 {fr ? "Lune" : "Moon"}</th>
+                <th>🔴 Mars</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.label}>
+                  <td><b>{r.label}</b></td>
+                  <td>{r.moon}</td>
+                  <td>{r.mars}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="compare-sources">
+            <a href={moon.src.url} target="_blank" rel="noreferrer">{moon.src.name}</a>
+            {" · "}
+            <a href={mars.src.url} target="_blank" rel="noreferrer">{mars.src.name}</a>
+            {" · "}
+            <a href="https://www.nasa.gov/artemis/" target="_blank" rel="noreferrer">NASA Artemis</a>
+            {" · "}
+            <a href="https://mars.nasa.gov/" target="_blank" rel="noreferrer">NASA Mars Exploration</a>
+          </p>
+          <small className="mut">
+            {fr
+              ? "Ces infos viennent de la NASA. Dans le jeu, le temps d'attente radio est plus simple (Lune ≈ 2 min, Mars ≈ 14 min)."
+              : "These facts come from NASA. In the game, radio wait time is simpler (Moon ≈ 2 min, Mars ≈ 14 min)."}
+          </small>
+        </div>
+
         <div className="bodies">{Object.values(BODIES).map((b) => <BodyCard key={b.id} b={b} onPick={() => { audio.ok(); c.pickDestination(b.id); }} />)}</div>
         <div className="row between"><Btn kind="ghost" onClick={() => c.goLoadout()}>← {t("back")}</Btn><span /></div>
       </div>
@@ -142,6 +201,9 @@ export function SiteStep() {
     <div className="screen kemet-step">
       <div className="panel step wide3">
         <div className="eyebrow">4 / 4 · {L(BODIES[dest].name, lang)}</div><h2>{t("siteTitle")}</h2><p className="mut">{t("siteSub")}</p>
+        <div className="mission-constraints"><b>🧭 {lang === "fr" ? "Avant le départ : contraintes réelles" : "Before launch: real constraints"}</b><span>🫁 {lang === "fr" ? "Atmosphère : " : "Atmosphere: "}{dest === "mars" ? "95,1 % CO₂ · pression 6,36 mb" : "vide spatial (atmosphère extrêmement ténue)"}</span><span>☀️ {lang === "fr" ? "Jour : " : "Day: "}{dest === "mars" ? "24,6597 h (un sol)" : "≈ 14 jours de jour / 14 jours de nuit"}</span><span>📡 {lang === "fr" ? "Délai aller simple : " : "One-way delay: "}{dest === "mars" ? "environ 3–22 min selon la position" : "≈ 1,3 s"}</span><small>{lang === "fr" ? "Les valeurs scientifiques sont sourcées ci-dessous. Les bonus restent des règles de jeu." : "Scientific values are sourced below. Bonuses remain game rules."}</small></div>
+        <AtlasMap dest={dest} sites={sites} site={site} onPick={(id) => { audio.click(); c.pickSite(id); }} lang={lang} />
+        {dest === "moon" && <small className="mut">{lang === "fr" ? "Projection plate : près du pôle Sud, les sites sont écrasés sur le bord bas de la carte." : "Flat projection: near the South Pole, sites are squashed along the bottom edge."}</small>}
         <div className="site-grid">
           <div className="site-list">{sites.map((s) => <button key={s.id} className={"site" + (s.id === site ? " on" : "")} onClick={() => { audio.click(); c.pickSite(s.id); }}><span>{s.icon}</span><b>{L(s.name, lang)}</b></button>)}</div>
           <div className="site-detail">{cur ? (<>
@@ -172,16 +234,73 @@ export function Transit() {
 }
 
 export function Quiz() {
-  const c = useCtrl(), t = useT(); const q = useGame((s) => s.quiz), life = useGame((s) => s.life);
-  if (!q) return null; const done = q.chosen != null;
+  const c = useCtrl(), t = useT();
+  const q = useGame((s) => s.quiz), life = useGame((s) => s.life), lang = useGame((s) => s.lang);
+  const fr = lang === "fr";
+
+  // Nova lit la question, puis les choix (numérotés), de façon progressive pour les enfants.
+  useEffect(() => {
+    if (!q || q.chosen != null) return;
+    const letters = ["A", "B", "C", "D"];
+    const optsText = (q.options || [])
+      .map((o, i) => `${letters[i] || i + 1}. ${o}`)
+      .join(". ");
+    const intro = fr
+      ? `Question. ${q.q} Voici les choix. ${optsText}`
+      : `Question. ${q.q} Here are the choices. ${optsText}`;
+    novaSpeak(intro, lang);
+    return () => stopNovaSpeak();
+  }, [q?.id, q?.q, q?.chosen, lang]);
+
+  // Après la réponse : Nova lit le résultat + l’explication + la source NASA.
+  useEffect(() => {
+    if (!q || q.chosen == null) return;
+    const right = q.right;
+    const goodLine = fr ? "Bravo ! C’est la bonne réponse." : "Great! That is the right answer.";
+    const badLine = fr
+      ? "Ce n’est pas la bonne réponse. Écoute bien l’explication."
+      : "That is not the right answer. Listen carefully to the explanation.";
+    const explain = `${right ? goodLine : badLine} ${q.why || ""}`;
+    novaSpeak(explain, lang);
+    return () => stopNovaSpeak();
+  }, [q?.chosen, q?.right, q?.why, lang]);
+
+  if (!q) return null;
+  const done = q.chosen != null;
   return (
     <div className="screen center quiz-screen">
       <div className="panel quiz">
         <div className="eyebrow">🎓 {t("quizTitle")}</div>
         <h2>{q.q}</h2>
-        <div className="qopts">{q.options.map((o, i) => <button key={i} disabled={done} className={"qopt" + (done && i === q.correct ? " ok" : "") + (done && i === q.chosen && i !== q.correct ? " ko" : "")} onClick={() => c.answerQuiz(i)}>{o}</button>)}</div>
-        {done && <div className={"qres " + (q.right ? "good" : "bad")}><b>{q.right ? "✔ " + t("quizRight") : "✖ " + t("quizWrong")}</b><p>{q.why}</p><SrcLink src={q.src} t={t} />{life <= 0 && <p className="lostline">{t("quizLifeOut")}</p>}</div>}
-        {done && <div className="row"><Btn onClick={() => c.continueQuiz()}>{t("quizNext")} ▶</Btn></div>}
+        <div className="qopts">
+          {q.options.map((o, i) => (
+            <button
+              key={i}
+              disabled={done}
+              className={
+                "qopt" +
+                (done && i === q.correct ? " ok" : "") +
+                (done && i === q.chosen && i !== q.correct ? " ko" : "")
+              }
+              onClick={() => c.answerQuiz(i)}
+            >
+              {o}
+            </button>
+          ))}
+        </div>
+        {done && (
+          <div className={"qres " + (q.right ? "good" : "bad")}>
+            <b>{q.right ? "✔ " + t("quizRight") : "✖ " + t("quizWrong")}</b>
+            <p>{q.why}</p>
+            <SrcLink src={q.src} t={t} />
+            {life <= 0 && <p className="lostline">{t("quizLifeOut")}</p>}
+          </div>
+        )}
+        {done && (
+          <div className="row">
+            <Btn onClick={() => c.continueQuiz()}>{t("quizNext")} ▶</Btn>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -203,6 +322,24 @@ export function CargoStep() {
             <span className="lo-ic">{on ? "✔" : "📦"}</span><div className="lo-txt"><b>{x.name}</b>{x.description && <small>{x.description}</small>}{x.mass !== undefined && <small>{x.mass} kg</small>}</div></button>); })}</div>
         <div className="row between"><Btn kind="ghost" onClick={() => c.goHangar()}>← {t("back")}</Btn><Btn onClick={() => c.goDestination()}>{t("next")} ▶</Btn></div>
       </div>
+    </div>
+  );
+}
+
+/** Carte réelle (tuiles NASA Trek) avec les sites d'atterrissage placés à leurs vraies coordonnées. */
+function AtlasMap({ dest, sites, site, onPick, lang }) {
+  const [bad, setBad] = useState(0); const L0 = LAYERS[dest]; const { cols, rows } = grid(2);
+  if (!L0) return null;
+  const cells = []; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push([r, c]);
+  return (
+    <div className="atlas" style={{ position: "relative", aspectRatio: "2 / 1", maxHeight: "30vh", margin: "6px auto 10px", borderRadius: 12, overflow: "hidden", background: "#1a1d2b", border: "1px solid #ffffff22" }}>
+      <div style={{ position: "absolute", inset: 0, display: "grid", gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)` }}>
+        {cells.map(([r, c]) => <img key={r + "-" + c} src={tileUrl(dest, 2, r, c)} alt="" draggable={false} onError={() => setBad((n) => n + 1)} style={{ width: "100%", height: "100%", display: "block", objectFit: "fill" }} />)}
+      </div>
+      {bad > cells.length / 2 && <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", background: "#0b0e1acc", color: "#cfd3dc", fontSize: 13, textAlign: "center", padding: 12 }}>{lang === "fr" ? "Carte NASA Trek indisponible (hors ligne ?). Les sites restent disponibles dans la liste." : "NASA Trek map unavailable (offline?). Sites remain available in the list."}</div>}
+      {sites.map((s) => { const co = SITE_COORDS[s.id]; if (!co) return null; const p = toXY(co), on = s.id === site; return (
+        <button key={s.id} onClick={() => onPick(s.id)} title={L(s.name, lang)} aria-label={L(s.name, lang)} style={{ position: "absolute", left: p.x + "%", top: p.y + "%", transform: "translate(-50%,-50%)", width: on ? 22 : 16, height: on ? 22 : 16, borderRadius: "50%", border: "2px solid #fff", background: on ? "#ff7a2f" : "#ffd24a", boxShadow: "0 0 0 3px #0008", cursor: "pointer", padding: 0 }} />); })}
+      <small style={{ position: "absolute", left: 6, top: 4, background: "#0009", color: "#fff", padding: "2px 6px", borderRadius: 6, fontSize: 10 }}>{lang === "fr" ? "Carte réelle : " : "Real map: "}<a href={L0.page} target="_blank" rel="noreferrer" style={{ color: "#8fd3ff" }}>NASA Solar System Treks · {L0.name}</a></small>
     </div>
   );
 }

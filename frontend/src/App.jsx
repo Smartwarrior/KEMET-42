@@ -8,6 +8,9 @@ import { Login, Hangar, Loadout, CargoStep, Destination, SiteStep, Transit, Quiz
 import { createApi } from "./kemet/api.js";
 import { createMissionClient } from "./kemet/mission.js";
 import { Intro, Briefing, Accident, ResolveBanner, Summary, Fact, End, Inspect, Tutorial, Settings, NoWebGL } from "./ui/Screens.jsx";
+import { SpaceAgriculture } from "./ui/SpaceAgriculture.jsx";
+import { NovaPanel } from "./ui/Nova.jsx";
+import { INCIDENT_CATALOG } from "./data/incidents.js";
 import { audio } from "./ui/audio.js";
 import { rt, resetEnts } from "./world/sim.js";
 import { HAZARDS } from "./game/layout.js";
@@ -16,7 +19,9 @@ const safeStorage = (() => { try { const k = "__t"; localStorage.setItem(k, "1")
 const hasWebGL = () => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (_) { return false; } };
 
 function Shell({ ctrl }) {
-  const phase = useGame((s) => s.phase), lang = useGame((s) => s.lang), sound = useGame((s) => s.sound), quality = useGame((s) => s.quality);
+  const phase = useGame((s) => s.phase), lang = useGame((s) => s.lang), sound = useGame((s) => s.sound), quality = useGame((s) => s.quality), agriOpen = useGame((s) => s.agriOpen);
+  const pendingEvent = useGame((s) => s.pendingEvent);
+  const incident = pendingEvent ? INCIDENT_CATALOG.find((i) => i.id === pendingEvent.id) || null : null;
   const [low, setLow] = useState(false); const env = useGame((s) => s.env);
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   useEffect(() => { audio.set(sound); }, [sound]);
@@ -48,6 +53,15 @@ function Shell({ ctrl }) {
       {phase === "fact" && <Fact />}
       {phase === "end" && <End />}
       <Settings />
+      {agriOpen && <SpaceAgriculture onClose={() => ctrl.closeAgriculture()} />}
+      {(phase === "accident" || phase === "plan") && (
+        <NovaPanel
+          lang={lang}
+          incident={phase === "accident" ? incident : null}
+          autoSpeak={phase === "accident"}
+          onStartGreenhouse={phase === "plan" ? () => ctrl.openAgriculture?.() : null}
+        />
+      )}
     </>
   );
 }

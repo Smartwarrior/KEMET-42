@@ -73,8 +73,9 @@ export function validateActions(state, actions, actionsConfig) {
 }
 
 export function drawEventForTurn(state, rng, data) {
-  const startDay = data?.config?.eventStartDay ?? 3;
-  const prob = data?.config?.eventProbability ?? 0.30;
+  // Un phénomène est tiré à chaque Sol dès le premier jour par défaut.
+  const startDay = data?.config?.eventStartDay ?? 1;
+  const prob = data?.config?.eventProbability ?? 1;
   if (state.day >= startDay && rng() < prob) {
     const eventsList = data?.events || [];
     const eligible = eventsList.filter(e => e.id !== state.lastEventId);

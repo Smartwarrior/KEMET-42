@@ -6,6 +6,7 @@ import { rt } from "../world/sim.js";
 import { CREW, CALLSIGN_COLORS, HAZARDS } from "../game/layout.js";
 import { focusCrew } from "../world/interact.js";
 import { audio } from "./audio.js";
+import { novaSpeak } from "./novaSpeak.js";
 
 export const useT = () => { const lang = useGame((s) => s.lang); return useMemo(() => makeT(lang), [lang]); };
 
@@ -156,6 +157,13 @@ function PlaceBanner() {
   return <div className="banner place"><span>{ACT_ICON[placing]} <b>{L(d.name, lang)}</b> — {t("placeHint")}</span><button onClick={() => { audio.ok(); c.autoPlace(); }}>{t("placeAuto")}</button><button className="ghost" onClick={() => { audio.click(); c.cancelPlacing(); }}>{t("cancel")}</button></div>;
 }
 
+function MissionCoach() {
+  const c = useCtrl(), phase = useGame((s) => s.phase), dest = useGame((s) => s.dest), plan = useGame((s) => s.plan), built = useGame((s) => s.built), lang = useGame((s) => s.lang);
+  if (phase !== "plan" || dest !== "mars" || (built.greenhouse || []).length || plan.some((p) => p.id === "build_greenhouse")) return null;
+  const fr = lang === "fr";
+  return <aside className="mission-coach"><div className="coach-top"><span className="coach-bot">🤖</span><div><b>{fr ? "NOVA, ton robot copain" : "NOVA, your robot friend"}</b><small>{fr ? "je t'aide" : "I help you"}</small></div><span className="coach-live">LIVE</span></div><p>{fr ? "Le savais-tu ? La NASA fait pousser des salades dans l'espace, dans une boîte spéciale. Sur Mars, il faut aussi une boîte fermée, avec de l'eau et de la lumière." : "Did you know? NASA grows salad in space in a special box. On Mars, you also need a closed box, with water and light."}</p><div className="coach-actions"><button type="button" onClick={() => novaSpeak(fr ? "Les plantes ont besoin d une boite fermee, d eau et de lumiere. Pas dehors !" : "Plants need a closed box, water and light. Not outside!", fr ? "fr" : "en")}>🔊 {fr ? "Écouter NOVA" : "Listen to NOVA"}</button><button onClick={() => { c.openAgriculture?.() || c.suggestGreenhouse(); }}>🌱 {fr ? "Essayer la serre maintenant" : "Try the greenhouse now"}</button><a href="https://science.nasa.gov/mission/veggie/" target="_blank" rel="noreferrer">NASA Veggie ↗</a></div></aside>;
+}
+
 function CamButtons() {
   const t = useT(); const [follow, setFollow] = useState(true);
   return (
@@ -234,7 +242,7 @@ export function HUD() {
   if (!live) return null;
   return (
     <div className="hud">
-      <TopBar /><Gauges /><CrewPanel /><PlaceBanner /><CamButtons /><Joystick /><Labels /><Toast />
+      <TopBar /><Gauges /><CrewPanel /><MissionCoach /><PlaceBanner /><CamButtons /><Joystick /><Labels /><Toast />
       <div className="controls">{t("controls")}</div>
       <Dock />
     </div>

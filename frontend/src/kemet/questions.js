@@ -1,22 +1,225 @@
-// Questions éducatives : chaque bonne réponse est tirée des sources officielles de facts.js (champ `src`). Les mauvaises réponses sont des leurres, pas des données.
+// Questions éducatives adaptées aux 7–12 ans.
+// Chaque bonne réponse vient d’une source officielle NASA (champ `src`).
+// Phrases courtes, une seule idée, mots simples. Les termes scientifiques sont expliqués dans `why`.
 import { SOURCES as S } from "./facts.js";
+
 const q = (id, body, src, fr, en) => ({ id, body, src, fr, en });
 const opt = (right, ...wrong) => ({ right, wrong });
+
 export const QUESTIONS = [
-  q("mars_g", "mars", S.mars, { q: "Quelle est la gravité moyenne à la surface de Mars ?", ...opt("3,73 m/s²", "9,81 m/s²", "1,62 m/s²", "24,7 m/s²"), why: "La fiche NASA donne 3,73 m/s², soit environ 38 % de la gravité terrestre." }, { q: "What is the mean surface gravity of Mars?", ...opt("3.73 m/s²", "9.81 m/s²", "1.62 m/s²", "24.7 m/s²"), why: "The NASA fact sheet gives 3.73 m/s²." }),
-  q("mars_co2", "mars", S.mars, { q: "Quel gaz domine l'atmosphère de Mars ?", ...opt("Le dioxyde de carbone (95,1 %)", "L'azote (78 %)", "L'oxygène (21 %)", "L'hydrogène"), why: "CO₂ 95,1 %, azote 2,59 %, argon 1,94 %, oxygène seulement 0,16 % : on ne peut pas y respirer." }, { q: "Which gas dominates the atmosphere of Mars?", ...opt("Carbon dioxide (95.1%)", "Nitrogen (78%)", "Oxygen (21%)", "Hydrogen"), why: "CO₂ 95.1%, N₂ 2.59%, Ar 1.94%, O₂ only 0.16%." }),
-  q("mars_day", "mars", S.mars, { q: "Combien dure un jour solaire sur Mars ?", ...opt("24,6597 heures", "12 heures", "30 heures", "10 jours"), why: "Un jour martien (un « Sol ») dure 24,6597 h, un peu plus que sur Terre." }, { q: "How long is a solar day on Mars?", ...opt("24.6597 hours", "12 hours", "30 hours", "10 days"), why: "A Martian day (a “Sol”) lasts 24.6597 h." }),
-  q("mars_moons", "mars", S.mars, { q: "Combien de lunes Mars possède-t-elle ?", ...opt("2 (Phobos et Déimos)", "0", "1", "4"), why: "Selon la fiche NASA : Phobos et Déimos." }, { q: "How many moons does Mars have?", ...opt("2 (Phobos and Deimos)", "0", "1", "4"), why: "Per the NASA fact sheet: Phobos and Deimos." }),
-  q("mars_esc", "mars", S.mars, { q: "Quelle est la vitesse de libération de Mars ?", ...opt("5,03 km/s", "11,2 km/s", "2,38 km/s", "0,5 km/s"), why: "5,03 km/s ." }, { q: "What is the escape velocity of Mars?", ...opt("5.03 km/s", "11.2 km/s", "2.38 km/s", "0.5 km/s"), why: "5.03 km/s." }),
-  q("mars_temp", "mars", S.mars, { q: "Quelle est la température moyenne de surface sur Mars ?", ...opt("≈ −59 °C (214 K)", "≈ +15 °C", "≈ +100 °C", "≈ −273 °C"), why: "La fiche NASA indique environ 214 K, soit −59 °C : le chauffage de la base est vital." }, { q: "What is the mean surface temperature on Mars?", ...opt("≈ −59 °C (214 K)", "≈ +15 °C", "≈ +100 °C", "≈ −273 °C"), why: "About 214 K, i.e. −59 °C." }),
-  q("jez_lake", "mars", S.jezero, { q: "Pourquoi le cratère Jezero a-t-il été choisi pour Perseverance ?", ...opt("On pense qu'il abritait un lac et un delta de rivière", "Il est parfaitement plat", "Il est le plus chaud de Mars", "Il contient une base humaine"), why: "Selon la NASA, des canaux fluviaux ont créé un lac il y a plus de 3,5 milliards d'années, avec un delta." }, { q: "Why was Jezero Crater chosen for Perseverance?", ...opt("It is believed to have held a lake and river delta", "It is perfectly flat", "It is the hottest place on Mars", "It already holds a human base"), why: "NASA says river channels created a lake more than 3.5 billion years ago." }),
-  q("gale_sharp", "mars", S.gale, { q: "Quelle hauteur de couches le Mont Sharp dépasse-t-il ?", ...opt("Plus de 5 km", "Environ 50 m", "Plus de 100 km", "Environ 500 m"), why: "La NASA indique un empilement de couches de plus de 5 km (3 miles) de haut." }, { q: "How tall is the stack of layers of Mount Sharp?", ...opt("More than 5 km", "About 50 m", "More than 100 km", "About 500 m"), why: "NASA: more than 5 km (3 miles)." }),
-  q("moon_g", "moon", S.moon, { q: "Quelle est la gravité à la surface de la Lune ?", ...opt("1,62 m/s²", "9,81 m/s²", "3,73 m/s²", "0 m/s²"), why: "1,62 m/s² : environ un sixième de la gravité terrestre." }, { q: "What is the surface gravity of the Moon?", ...opt("1.62 m/s²", "9.81 m/s²", "3.73 m/s²", "0 m/s²"), why: "1.62 m/s²." }),
-  q("moon_dist", "moon", S.moon, { q: "À quelle distance moyenne de la Terre se trouve la Lune ?", ...opt("384 400 km", "38 400 km", "3 844 000 km", "150 millions km"), why: "La distance moyenne (demi-grand axe) est de 384 400 km, variant de 363 300 à 405 500 km." }, { q: "What is the mean Earth–Moon distance?", ...opt("384,400 km", "38,400 km", "3,844,000 km", "150 million km"), why: "384,400 km, ranging 363,300–405,500 km." }),
-  q("moon_atm", "moon", S.moon, { q: "Peut-on respirer l'atmosphère de la Lune ?", ...opt("Non : elle est extrêmement ténue", "Oui, comme sur Terre", "Oui, mais seulement la nuit", "Oui, grâce à son azote"), why: "Pression nocturne d'environ 3 × 10⁻¹⁵ bar : pratiquement le vide. Il faut une combinaison." }, { q: "Can you breathe the Moon's atmosphere?", ...opt("No: it is extremely tenuous", "Yes, like on Earth", "Yes, but only at night", "Yes, thanks to its nitrogen"), why: "Night pressure about 3 × 10⁻¹⁵ bar: nearly a vacuum." }),
-  q("moon_temp", "moon", S.moon, { q: "Quelle plage de température à l'équateur lunaire ?", ...opt("De 95 K à 390 K", "De 250 K à 300 K", "De 0 K à 50 K", "De 500 K à 900 K"), why: "La fiche NASA : 95 K à 390 K entre la nuit et le jour." }, { q: "What is the Moon's equatorial temperature range?", ...opt("95 K to 390 K", "250 K to 300 K", "0 K to 50 K", "500 K to 900 K"), why: "NASA: 95 K to 390 K." }),
-  q("art_n", "moon", S.artemis, { q: "Combien de régions candidates NASA a-t-elle identifiées pour Artemis III ?", ...opt("13", "3", "50", "100"), why: "13 régions, toutes à moins de 6° de latitude du pôle Sud lunaire." }, { q: "How many candidate regions did NASA identify for Artemis III?", ...opt("13", "3", "50", "100"), why: "13 regions, all within 6° of latitude of the lunar South Pole." }),
-  q("art_ice", "moon", S.artemis, { q: "Pourquoi la glace d'eau lunaire est-elle utile aux astronautes ?", ...opt("Elle peut fournir oxygène et hydrogène", "Elle sert à construire des routes", "Elle bloque les radiations à 100 %", "Elle n'est d'aucune utilité"), why: "NASA : la glace d'eau peut fournir l'oxygène et l'hydrogène pour le soutien-vie et le carburant." }, { q: "Why is lunar water ice useful to astronauts?", ...opt("It can supply oxygen and hydrogen", "It is used to build roads", "It blocks 100% of radiation", "It is useless"), why: "NASA: water ice can supply oxygen and hydrogen for life support and fuel." }),
-  q("art_sun", "moon", S.artemis, { q: "Que offrent les 13 régions candidates pendant la mission de 6,5 jours ?", ...opt("Un accès continu à la lumière du Soleil", "Une nuit permanente", "Une atmosphère respirable", "Du réseau 5G"), why: "NASA : accès continu au Soleil, source d'énergie, qui limite aussi les écarts de température." }, { q: "What do the 13 candidate regions offer during the 6.5-day mission?", ...opt("Continuous access to sunlight", "Permanent night", "A breathable atmosphere", "5G coverage"), why: "NASA: continuous sunlight access, a power source that also limits temperature swings." }),
+  // —— Mars ——
+  q(
+    "mars_day",
+    "mars",
+    S.mars,
+    {
+      q: "Combien de temps dure une journée sur Mars ?",
+      ...opt("Presque 25 heures (un Sol)", "12 heures", "30 heures", "10 jours"),
+      why: "Une journée sur Mars s’appelle un Sol. Elle dure 24 heures et environ 40 minutes. C’est un peu plus long qu’une journée sur Terre.",
+    },
+    {
+      q: "How long is a day on Mars?",
+      ...opt("Almost 25 hours (a Sol)", "12 hours", "30 hours", "10 days"),
+      why: "A day on Mars is called a Sol. It lasts about 24 hours and 40 minutes. A bit longer than a day on Earth.",
+    }
+  ),
+  q(
+    "mars_temp",
+    "mars",
+    S.mars,
+    {
+      q: "Il fait plutôt chaud ou froid sur Mars ?",
+      ...opt("Très froid (environ −60 °C)", "Comme sur Terre", "Très chaud", "Toujours 0 °C"),
+      why: "La température moyenne est d’environ −59 °C. C’est pour cela que le chauffage de la base est très important.",
+    },
+    {
+      q: "Is Mars mostly hot or cold?",
+      ...opt("Very cold (about −60 °C)", "Like on Earth", "Very hot", "Always 0 °C"),
+      why: "The average temperature is about −59 °C. That is why base heating is so important.",
+    }
+  ),
+  q(
+    "mars_g",
+    "mars",
+    S.mars,
+    {
+      q: "Sur Mars, tu pèses moins ou plus que sur Terre ?",
+      ...opt("Moins (environ 3 fois moins)", "Pareil", "Plus", "Tu ne pèses plus rien"),
+      why: "La gravité sur Mars est plus faible : environ 38 % de celle de la Terre. Tu te sentirais plus léger.",
+    },
+    {
+      q: "On Mars, do you weigh less or more than on Earth?",
+      ...opt("Less (about 3 times less)", "The same", "More", "You weigh nothing"),
+      why: "Gravity on Mars is weaker: about 38 % of Earth’s. You would feel lighter.",
+    }
+  ),
+  q(
+    "mars_co2",
+    "mars",
+    S.mars,
+    {
+      q: "Peut-on respirer l’air de Mars sans combinaison ?",
+      ...opt("Non, il n’y a presque pas d’oxygène", "Oui, comme sur Terre", "Oui, la nuit seulement", "Oui, près des volcans"),
+      why: "L’air de Mars est surtout du gaz carbonique (CO₂). Il y a très peu d’oxygène. Il faut une combinaison pour respirer.",
+    },
+    {
+      q: "Can you breathe Mars air without a spacesuit?",
+      ...opt("No, there is almost no oxygen", "Yes, like on Earth", "Yes, only at night", "Yes, near volcanoes"),
+      why: "Mars air is mostly carbon dioxide (CO₂). There is very little oxygen. You need a spacesuit to breathe.",
+    }
+  ),
+  q(
+    "mars_moons",
+    "mars",
+    S.mars,
+    {
+      q: "Combien de lunes a Mars ?",
+      ...opt("2 (Phobos et Déimos)", "0", "1", "4"),
+      why: "Mars a deux petites lunes : Phobos et Déimos. Elles sont beaucoup plus petites que notre Lune.",
+    },
+    {
+      q: "How many moons does Mars have?",
+      ...opt("2 (Phobos and Deimos)", "0", "1", "4"),
+      why: "Mars has two small moons: Phobos and Deimos. They are much smaller than our Moon.",
+    }
+  ),
+  q(
+    "jez_lake",
+    "mars",
+    S.jezero,
+    {
+      q: "Pourquoi le cratère Jezero est-il intéressant pour les scientifiques ?",
+      ...opt("Il y avait un lac et un delta il y a longtemps", "Il est le plus chaud", "Il est parfaitement plat", "Il a déjà une base"),
+      why: "La NASA a choisi Jezero parce qu’il y a très longtemps, de l’eau a formé un lac et un delta. On cherche des traces de vie passée.",
+    },
+    {
+      q: "Why is Jezero Crater interesting to scientists?",
+      ...opt("It once had a lake and a river delta", "It is the hottest place", "It is perfectly flat", "It already has a base"),
+      why: "NASA chose Jezero because long ago water formed a lake and a delta. Scientists look for signs of past life.",
+    }
+  ),
+  q(
+    "gale_sharp",
+    "mars",
+    S.gale,
+    {
+      q: "Le Mont Sharp dans le cratère Gale est-il grand ?",
+      ...opt("Oui, plus de 5 km de couches de roches", "Non, seulement 50 m", "Oui, plus de 100 km", "Non, 500 m"),
+      why: "Le Mont Sharp est formé de couches de roches empilées sur plus de 5 km. Le rover Curiosity les étudie.",
+    },
+    {
+      q: "Is Mount Sharp in Gale Crater tall?",
+      ...opt("Yes, more than 5 km of rock layers", "No, only 50 m", "Yes, more than 100 km", "No, 500 m"),
+      why: "Mount Sharp is made of rock layers stacked more than 5 km high. The Curiosity rover studies them.",
+    }
+  ),
+
+  // —— Lune ——
+  q(
+    "moon_g",
+    "moon",
+    S.moon,
+    {
+      q: "Sur la Lune, tu pèses moins ou plus que sur Terre ?",
+      ...opt("Beaucoup moins (environ 6 fois moins)", "Pareil", "Plus", "Tu flottes toujours"),
+      why: "La gravité sur la Lune est environ 6 fois plus faible que sur Terre. Tu pourrais sauter plus haut !",
+    },
+    {
+      q: "On the Moon, do you weigh less or more than on Earth?",
+      ...opt("Much less (about 6 times less)", "The same", "More", "You always float"),
+      why: "Gravity on the Moon is about 6 times weaker than on Earth. You could jump higher!",
+    }
+  ),
+  q(
+    "moon_dist",
+    "moon",
+    S.moon,
+    {
+      q: "À quelle distance se trouve la Lune de la Terre ?",
+      ...opt("Environ 384 000 km", "38 000 km", "3 millions de km", "150 millions de km"),
+      why: "La Lune est à environ 384 400 km de la Terre en moyenne. C’est la distance moyenne donnée par la NASA.",
+    },
+    {
+      q: "How far is the Moon from Earth?",
+      ...opt("About 384,000 km", "38,000 km", "3 million km", "150 million km"),
+      why: "The Moon is about 384,400 km from Earth on average. That is the mean distance from NASA.",
+    }
+  ),
+  q(
+    "moon_air",
+    "moon",
+    S.moon,
+    {
+      q: "Peut-on respirer sur la Lune sans combinaison ?",
+      ...opt("Non, il n’y a presque pas d’air", "Oui, la nuit", "Oui, le jour", "Oui, près des cratères"),
+      why: "L’atmosphère de la Lune est extrêmement ténue : presque du vide. Il faut absolument une combinaison.",
+    },
+    {
+      q: "Can you breathe on the Moon without a spacesuit?",
+      ...opt("No, there is almost no air", "Yes, at night", "Yes, during the day", "Yes, near craters"),
+      why: "The Moon’s atmosphere is extremely thin: nearly a vacuum. You must wear a spacesuit.",
+    }
+  ),
+  q(
+    "moon_temp",
+    "moon",
+    S.moon,
+    {
+      q: "Les températures sur la Lune changent-elles beaucoup ?",
+      ...opt("Oui, très chaud le jour et très froid la nuit", "Non, toujours tiède", "Non, toujours glacé", "Oui, mais peu"),
+      why: "À l’équateur, la température peut aller d’environ −180 °C la nuit à plus de +100 °C le jour. Les écarts sont énormes.",
+    },
+    {
+      q: "Do temperatures on the Moon change a lot?",
+      ...opt("Yes, very hot by day and very cold at night", "No, always mild", "No, always freezing", "Yes, but only a little"),
+      why: "At the equator, temperature can go from about −180 °C at night to over +100 °C by day. The swings are huge.",
+    }
+  ),
+  q(
+    "art_ice",
+    "moon",
+    S.artemis,
+    {
+      q: "Pourquoi la glace d’eau sur la Lune est-elle utile ?",
+      ...opt("Elle peut donner de l’oxygène et de l’hydrogène", "Pour construire des routes", "Elle bloque toutes les radiations", "Elle n’est pas utile"),
+      why: "La glace d’eau peut fournir de l’oxygène pour respirer et de l’hydrogène pour le carburant. C’est très précieux pour les astronautes.",
+    },
+    {
+      q: "Why is water ice on the Moon useful?",
+      ...opt("It can give oxygen and hydrogen", "To build roads", "It blocks all radiation", "It is not useful"),
+      why: "Water ice can supply oxygen to breathe and hydrogen for fuel. It is very valuable for astronauts.",
+    }
+  ),
+  q(
+    "art_sun",
+    "moon",
+    S.artemis,
+    {
+      q: "Pourquoi la NASA regarde le pôle Sud de la Lune pour Artemis ?",
+      ...opt("Il y a de la lumière du Soleil presque tout le temps", "Il fait toujours nuit", "L’air y est respirable", "Il y a du réseau Internet"),
+      why: "Près du pôle Sud, certaines zones reçoivent la lumière du Soleil presque en continu. C’est pratique pour l’énergie.",
+    },
+    {
+      q: "Why does NASA look at the Moon’s South Pole for Artemis?",
+      ...opt("There is sunlight almost all the time", "It is always night", "The air is breathable", "There is Internet"),
+      why: "Near the South Pole, some places get sunlight almost continuously. That helps for power.",
+    }
+  ),
+  q(
+    "art_n",
+    "moon",
+    S.artemis,
+    {
+      q: "Combien de régions la NASA a-t-elle choisies pour un atterrissage Artemis ?",
+      ...opt("13 régions près du pôle Sud", "3 régions", "50 régions", "100 régions"),
+      why: "La NASA a identifié 13 régions candidates, toutes près du pôle Sud lunaire.",
+    },
+    {
+      q: "How many regions did NASA choose for an Artemis landing?",
+      ...opt("13 regions near the South Pole", "3 regions", "50 regions", "100 regions"),
+      why: "NASA identified 13 candidate regions, all near the lunar South Pole.",
+    }
+  ),
 ];
+
 export const forBody = (id) => QUESTIONS.filter((x) => x.body === id);

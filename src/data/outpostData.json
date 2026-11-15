@@ -10,10 +10,7 @@
     "radiationMarsSurfaceMsvYear": 300.0,
     "eclssWaterRecyclingEfficiency": 0.98,
     "sources": [
-      "NASA Human Research Roadmap",
-      "NASA RadLab Database",
-      "ISS Environmental Control and Life Support System (ECLSS)",
-      "NASA Space Technology Mission Directorate (Kilopower & MOXIE)"
+      "Cahier des charges KEMET-42 : valeurs de jeu simplifiées, non vérifiées auprès d'une publication NASA (fichier non utilisé par le serveur actuel)"
     ]
   },
   "modules": [

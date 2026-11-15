@@ -83,7 +83,7 @@ export const RES = {
 };
 export const ACT_ICON = { build_solar: "🔆", build_moxie: "💨", build_greenhouse: "🌱", build_shield: "🛡️", emergency_o2: "🫧", emergency_energy: "🔋", emergency_food: "🥫", emergency_protection: "☢️", repair: "🔧", transmit: "📡" };
 export const MOD_ACTION = { solar: "build_solar", moxie: "build_moxie", greenhouse: "build_greenhouse", shield: "build_shield" };
-export const EVENT_ICON = { dust_storm: "🌪️", solar_flare: "☀️", power_failure: "🔌", oxygen_leak: "💨", food_shortage: "🥀", ice_discovery: "🧊", comm_blackout: "📡", calm_sol: "🌅" };
+export const EVENT_ICON = { dust_storm: "🌪️", solar_flare: "☀️", power_failure: "🔌", oxygen_leak: "💨", food_shortage: "🥀", greenhouse_contam: "🦠", ice_discovery: "🧊", comm_blackout: "📡", life_support_fail: "🫁", calm_sol: "🌅" };
 export function makeT(lang) {
   const base = i18n[lang] || i18n.fr, ex = extra[lang] || extra.fr;
   return (key, p) => { let s = ex[key] ?? base[key] ?? key; if (p) for (const k in p) s = s.replaceAll(`{${k}}`, p[k]); return s; };

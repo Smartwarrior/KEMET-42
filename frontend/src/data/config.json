@@ -34,8 +34,8 @@
   "lowEnergyThreshold": 20,
   "lateGameTensionCoefficient": 1.6,
   "lateGameStartDay": 16,
-  "eventProbability": 0.5,
-  "eventStartDay": 3,
+  "eventProbability": 1.0,
+  "eventStartDay": 1,
   "ranks": {
     "cadet": 300,
     "explorer": 500,

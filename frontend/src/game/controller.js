@@ -51,7 +51,10 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
     best: save0.best || 0, hasSave: !!save0.game, firstTime: !save0.tutorialDone, tutorial: 0,
     dayCount: 1, toast: null, serverMode: !!mission, srv: null, srvBase: null, srvBriefing: null, srvBusy: false, srvError: null, cargo: [], srvAlerts: [], quality: save0.quality || "auto", built: save0.built || freshBuilt(), inspect: null,
     commDelayMin: 12, pendingTransmit: null, lastChoiceEffects: null,
+    assistant: { kind: "welcome", visible: true, completed: false },
+    shelterOpen: false, agriOpen: false,
   });
+
   let rng = createRNG(seed ?? ((Date.now() ^ 0x5eed) >>> 0));
   let timers = [];
   const later = (fn, ms) => { const id = setTimeout(fn, ms); timers.push(id); return id; };
@@ -106,7 +109,7 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
       const res = { ...st.loadout }; const site = (SITES[dest] || []).find((x) => x.id === st.site);
       if (site?.gameBonus) res[site.gameBonus.res] = Math.min(100, res[site.gameBonus.res] + site.gameBonus.amount);
       g0 = { ...g0, resources: res }; quizBag = [];
-      store.set({ env: dest, life: RULES.life, quiz: null, quizStats: { right: 0, wrong: 0 }, lifeLog: [], built: freshBuilt(), inspect: null, game: g0, phase: "plan", plan: [], placing: null, pendingEvent: null, choicesReady: false, lastDelta: null, score: null, factId: null, dayCount: 1, tutorial: g().firstTime ? 1 : 0 });
+      store.set({ env: dest, life: RULES.life, quiz: null, quizStats: { right: 0, wrong: 0 }, lifeLog: [], built: freshBuilt(), inspect: null, game: g0, phase: "plan", plan: [], placing: null, pendingEvent: null, choicesReady: false, lastDelta: null, score: null, factId: null, dayCount: 1, tutorial: g().firstTime ? 1 : 0, assistant: { kind: "welcome", visible: true, completed: false } });
       bus.emit("reset", {}); persist();
     },
     // ----- parcours KEMET-42 -----
@@ -181,6 +184,13 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
       store.set({ plan: [...g().plan, { id, slot }], placing: null }); bus.emit("placing", null); return true;
     },
     autoPlace() { const id = g().placing; if (!id) return false; const f = freeSlots(defOf(id).moduleType); return f.length ? api.placeAt(f[0]) : false; },
+    suggestGreenhouse() {
+      if (g().phase !== "plan" || g().plan.length >= 2) return false;
+      const result = api.beginPlacing("build_greenhouse");
+      if (result?.ok) api.autoPlace();
+      if (result?.ok) store.set({ assistant: { kind: "greenhouse", visible: true, completed: true } });
+      return !!result?.ok;
+    },
     removePlan(i) { const plan = g().plan.slice(); plan.splice(i, 1); store.set({ plan }); },
 
     // ----- exécution du jour -----
@@ -209,7 +219,7 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
       const s = g();
       const ev = drawEventForTurn(s.game, rng, data);
       if (!ev) return api._resolve(null, null);
-      store.set({ phase: "accident", pendingEvent: ev, choicesReady: false, bonusReached: false });
+      store.set({ phase: "accident", pendingEvent: ev, choicesReady: false, bonusReached: false, assistant: { kind: "incident", eventId: ev.id, visible: true, completed: false } });
       bus.emit("accident", { event: ev, hazard: HAZARDS[ev.id] || null });
       later(() => store.set({ choicesReady: true }), T.accidentIntro);
     },
@@ -218,12 +228,52 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
       const hz = HAZARDS[s.pendingEvent?.id]; if (!hz?.bonus) return false;
       store.set({ bonusReached: true }); bus.emit("bonus", { hazard: hz }); return true;
     },
+    /** Entrer dans l’abri (tempête / radiation) — chorée 3D + panneau lié aux ressources. */
+    enterShelter() {
+      const s = g();
+      if (s.shelterOpen) return;
+      store.set({ shelterOpen: true });
+      bus.emit("shelter", { enter: true });
+      if (s.serverMode && mission?.enterShelter) {
+        safe(() => mission.enterShelter({ reason: s.pendingEvent?.id || "manual" }), null);
+      }
+    },
+    exitShelter() {
+      if (!g().shelterOpen) return;
+      store.set({ shelterOpen: false });
+      bus.emit("shelter", { enter: false });
+      if (g().serverMode && mission?.exitShelter) safe(() => mission.exitShelter(), null);
+    },
     chooseEvent(choiceId) {
       const s = g(); if (s.phase !== "accident" || !s.choicesReady) return;
       const ev = s.pendingEvent; const ch = ev.choices.find((c) => c.id === choiceId) || ev.choices[0];
-      api._resolve(ev, ch);
+      // Bloquer un double-clic pendant la réparation 3D
+      store.set({ choicesReady: false, assistant: { kind: "repairing", eventId: ev.id, choiceId, visible: true, completed: false } });
+      const hz = HAZARDS[ev.id] || null;
+      const success = !ch || ch.risk !== "high";
+      // Chorée : déplacement + pose work + étincelles, puis résolution des règles
+      if (hz?.pos) {
+        const animated = bus.emit("repair", {
+          hazard: { id: ev.id, pos: hz.pos, bonus: hz.bonus, crewIdx: hz.crewIdx },
+          success,
+          onDone: () => api._resolve(ev, ch),
+        });
+        // En mode sans scène 3D (tests, WebGL indisponible), il n’y a pas
+        // d’animation à attendre : on résout immédiatement l’événement.
+        if (!animated) api._resolve(ev, ch);
+        else later(() => { if (g().phase === "accident") api._resolve(ev, ch); }, 5500);
+      } else {
+        api._resolve(ev, ch);
+      }
     },
     _resolve(ev, choice) {
+      // Évite double résolution si onDone + timeout
+      if (g().phase !== "accident" && g().phase !== "execute") {
+        // allow resolve from accident only; if already resolving, skip
+        if (g().phase === "resolve" || g().phase === "summary") return;
+      }
+      if (g().phase !== "accident") return;
+
       const s = g(); const before = s.game;
       let next = playTurn(before, { actions: s.plan.map((p) => ({ id: p.id })), forcedEvent: ev, eventChoice: choice ? { choiceId: choice.id } : null }, rng, data);
       let bonusRes = null;
@@ -251,10 +301,11 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
       let life = s.life, lifeLog = s.lifeLog, risky = false;
       if (choice && choice.risk === "high") { risky = true; life = Math.max(0, life - RULES.riskyChoice); lifeLog = [...lifeLog, { day: before.day, why: "risky", amount: RULES.riskyChoice }]; }
       const lastChoiceEffects = choice ? { cost: choice.cost || 0, effects: choice.effects || {}, risk: choice.risk || "low" } : null;
-      store.set({ life, lifeLog, riskyChoice: risky, phase: "resolve", built, game: next, lastDelta: delta, lastChoice: choice ? choice.label : null, lastChoiceEffects, lastEventId: ev?.id || null, factId: ev?.factId || null, bonusRes, crewLost: before.crew - next.crew, plan: [], pendingTransmit, toast: didTransmit ? "transmit" : null });
+      store.set({ life, lifeLog, riskyChoice: risky, phase: "resolve", built, game: next, lastDelta: delta, lastChoice: choice ? choice.label : null, lastChoiceEffects, lastEventId: ev?.id || null, factId: ev?.factId || null, bonusRes, crewLost: before.crew - next.crew, plan: [], pendingTransmit, toast: didTransmit ? "transmit" : null, shelterOpen: false });
       bus.emit("resolve", { before, after: next, event: ev, choice, crewLost: before.crew - next.crew });
       later(() => store.set({ phase: "summary", dayCount: next.day }), T.daySweep);
     },
+
     continueSummary() {
       const s = g(); if (s.phase !== "summary") return;
       if (s.factId) store.set({ phase: "fact" }); else api._afterDay();
@@ -272,8 +323,26 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
     },
     inspect(type) { store.set({ inspect: type }); },
     clearToast() { store.set({ toast: null }); },
+
+    openAgriculture() { store.set({ agriOpen: true }); },
+    closeAgriculture() { store.set({ agriOpen: false }); },
+    harvestAgriculture(crop) {
+      const s = g(); if (!crop) return;
+      const foodBonus = Number(crop.bonusFood) || 10;
+      const lifeBonus = Number(crop.bonusLife) || 0;
+      const game = { ...s.game, resources: { ...s.game.resources, food: Math.min(100, (s.game.resources.food || 0) + Math.min(20, Math.round(foodBonus * 0.6))) } };
+      const life = Math.min(RULES.life, s.life + lifeBonus);
+      store.set({ game, life, agriOpen: false, toast: { key: "agriHarvest", t: Date.now() } });
+      bus.emit("agriHarvest", { crop });
+      if (s.serverMode && mission?.greenhouseAction) {
+        safe(() => mission.greenhouseStart({ plantId: crop.id === "radish" ? "mizuna" : crop.id === "potato" ? "zinnia" : "lettuce" }), null);
+        safe(() => mission.greenhouseAction({ action: "harvest" }), null);
+      }
+      persist();
+    },
     destroy() { clearTimers(); },
   };
   if (mission) Object.assign(api, serverMethods({ store, bus, mission, later, RULES, writeSave, backend, makeQuiz, clearTimers, T }));
+  api.mission = mission;
   return api;
 }

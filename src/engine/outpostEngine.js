@@ -22,7 +22,7 @@ export class OutpostEngine {
       powerKwh: 100.0,            // 0 à 100%
       kilopowerActive: false,     // Réacteur de secours NASA
       // 4. PROTECTION RADIATIONS (Shielding)
-      shieldIntegrity: 100,       // 0 à 100% (RadLab standard)
+      shieldIntegrity: 100,       // 0 à 100% (règle de jeu)
       radiationDoseMsv: 0.8,      // Dose quotidienne reçue
       
       status: 'OPERATIONAL',      // 'OPERATIONAL', 'CRITICAL', 'MISSION_FAILED'
@@ -104,7 +104,7 @@ export class OutpostEngine {
     if (this.state.powerKwh > 30) score += 15;
     if (this.state.foodKg > 50) score += 15;
     
-    // Protection anti-radiations RadLab (30 points)
+    // Protection anti-radiations (règle de jeu) (30 points)
     score += Math.round((this.state.shieldIntegrity / 100) * 30);
 
     return Math.min(100, score);
