@@ -37,14 +37,14 @@ export function serverMethods({ store, bus, mission, later, RULES, writeSave, ba
     },
     /** « Sol suivant » : le serveur consomme les ressources et signale les alertes ; la scène les joue. */
     async nextDayServer() {
-      const s = g(); if (s.phase !== "plan") return; store.set({ phase: "execute" });
+      const s = g(); if (s.phase !== "plan") return; store.set({ phase: "execute", srvError: null });
       try {
         const res = await mission.nextDay(); const st = await mission.status(); const day = st.day ?? s.game.day + 1;
         const hist = [...s.game.history, { day: s.game.day, resources: s.game.resources }];
         const game = mkGame(st, s.srvBase, day, hist);
         const alerts = res.alerts; const dust = alerts.some((a) => a.kind === "dust_storm");
         game.status = { dust: dust ? 1 : 0 };
-        store.set({ srv: st, game, srvAlerts: alerts, bonusReached: false });
+        store.set({ srv: st, game, srvAlerts: alerts, bonusReached: false, srvError: null });
         if (alerts.length) {
           const a = alerts[0], hz = HAZARDS[a.kind] || null;
           store.set({ phase: "accident", pendingEvent: { id: a.kind, negative: true, text: { fr: a.text, en: a.text }, choices: [], factId: null }, choicesReady: false });

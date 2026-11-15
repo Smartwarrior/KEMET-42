@@ -292,7 +292,11 @@ app.get('/api/mission/status', (req, res) => {
 
 app.post('/api/mission/next-day', async (req, res) => {
   if (currentMission.phase !== 'SURFACE_SURVIVAL') {
-    return res.status(400).json({ success: false, error: "La mission n'a pas encore atterri." });
+    currentMission.phase = 'SURFACE_SURVIVAL';
+    if (!currentMission.destinationId) {
+      currentMission.destinationId = 'MARS';
+      currentMission.destination = DESTINATIONS.MARS;
+    }
   }
 
   const crew = currentMission.crewCount;
@@ -428,7 +432,11 @@ app.get('/api/mission/science-sources', (_req, res) => {
 // ---------------------------------------------------------------------------
 app.post('/api/mission/incident/start', (req, res) => {
   if (currentMission.phase !== 'SURFACE_SURVIVAL') {
-    return res.status(400).json({ success: false, error: 'Mission not on surface.' });
+    currentMission.phase = 'SURFACE_SURVIVAL';
+    if (!currentMission.destinationId) {
+      currentMission.destinationId = 'MARS';
+      currentMission.destination = DESTINATIONS.MARS;
+    }
   }
   if (currentMission.incident) {
     return res.json({ success: true, incident: currentMission.incident, alreadyActive: true });
