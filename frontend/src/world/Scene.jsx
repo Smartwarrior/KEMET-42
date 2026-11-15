@@ -9,6 +9,7 @@ import { HabitatInterior } from "./HabitatInterior.jsx";
 import { Crew } from "./Crew.jsx";
 import { Weather } from "./Effects.jsx";
 import { CameraRig } from "./CameraRig.jsx";
+import { Greenhouse3D } from "./Greenhouse3D.jsx";
 
 /** Entrées clavier (ZQSD / WASD / flèches, Maj = courir). Le joystick tactile écrit dans rt.cmd lui aussi. */
 function useKeyboard() {
@@ -54,6 +55,7 @@ function Inner({ ctrl, onLow, quality, env }) {
       <Habitat />
       <HabitatInterior />
       <Modules ctrl={ctrl} />
+      <Greenhouse3D ctrl={ctrl} />
       <Crew ctrl={ctrl} />
       <Weather />
       <Ripple />

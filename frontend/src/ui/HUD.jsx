@@ -134,6 +134,27 @@ function ServerDock() {
   const lang = useGame((s) => s.lang);
   const err = useGame((s) => s.srvError);
   const day = useGame((s) => s.game.day || 1);
+  const [timer, setTimer] = useState(19);
+
+  // Compte à rebours automatique : un Sol dure 19s
+  useEffect(() => {
+    if (phase !== "plan") {
+      setTimer(19);
+      return;
+    }
+    setTimer(19);
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          c.nextDayServer?.();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [phase, day, c]);
 
   if (phase !== "plan") return null;
 
@@ -146,9 +167,13 @@ function ServerDock() {
             className="go"
             disabled={phase !== "plan"}
             onClick={() => { audio.unlock(); audio.ok(); c.nextDayServer(); }}
-            style={{ padding: "12px 28px", fontSize: "1.05rem", minHeight: 48, boxShadow: "0 4px 20px rgba(255, 106, 61, 0.4)" }}
+            style={{ padding: "12px 28px", fontSize: "1.05rem", minHeight: 48, boxShadow: "0 4px 20px rgba(255, 106, 61, 0.4)", display: "flex", alignItems: "center", gap: 10 }}
           >
-            {lang === "fr" ? `Clôturer le Sol ${day} :i-play:` : `Complete Sol ${day} :i-play:`}
+            <span>{lang === "fr" ? `Clôturer le Sol ${day}` : `Complete Sol ${day}`}</span>
+            <span style={{ background: "rgba(0,0,0,0.28)", padding: "2px 8px", borderRadius: 999, fontSize: "0.88rem", fontWeight: 700, minWidth: "32px", textAlign: "center" }}>
+              {timer}s
+            </span>
+            <span>:i-play:</span>
           </button>
         </div>
       </div>
@@ -162,12 +187,39 @@ function Dock() {
   const locked = phase !== "plan"; const groups = [["grpBuild", "build"], ["grpUrgent", "emergency"], ["grpOther", null]];
   const countIn = (id) => plan.filter((p) => p.id === id).length;
   const click = (a) => { audio.click(); const r = c.beginPlacing(a.id); if (r && !r.ok) audio.error(); };
+
+  const [timer, setTimer] = useState(19);
+
+  // Compte à rebours automatique : un Sol dure 19s
+  useEffect(() => {
+    if (phase !== "plan") {
+      setTimer(19);
+      return;
+    }
+    setTimer(19);
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          c.endDay?.();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [phase, game.day, c]);
+
   return (
     <footer className={"dock" + (locked ? " locked" : "")}>
       <div className="plan">
         <div className="plan-slots">{[0, 1].map((i) => { const p = plan[i], d = p && c.defOf(p.id); return (
           <div key={i} className={"slot" + (p ? " full" : "")}>{p ? (<><span>{ACT_ICON[p.id]}</span><b>{L(d.name, lang)}</b><em>{d.cost ? `−${d.cost}` : t("free0")}</em><button onClick={() => { audio.click(); c.removePlan(i); }} aria-label={t("cancel")}>✕</button></>) : <small>{t("planSlot", { n: i + 1 })} · {t("planEmpty")}</small>}</div>); })}</div>
-        <button className="go" disabled={locked} onClick={() => { audio.unlock(); audio.ok(); c.endDay(); }}>{plan.length ? t("launchDay") : t("endDay")} :i-play:</button>
+        <button className="go" disabled={locked} onClick={() => { audio.unlock(); audio.ok(); c.endDay(); }} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span>{plan.length ? t("launchDay") : t("endDay")}</span>
+          <span style={{ background: "rgba(0,0,0,0.28)", padding: "2px 8px", borderRadius: 999, fontSize: "0.88rem", fontWeight: 700 }}>{timer}s</span>
+          <span>:i-play:</span>
+        </button>
       </div>
       <div className="cards" role="list">
         {groups.map(([lab, type]) => (
@@ -227,7 +279,7 @@ function DailyMissionTracker() {
     <div
       style={{
         position: "fixed",
-        top: "calc(64px + var(--safe-t, 0px))",
+        top: "calc(84px + var(--safe-t, 0px))",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 15,
@@ -244,14 +296,14 @@ function DailyMissionTracker() {
           display: "flex",
           alignItems: "center",
           gap: 10,
-          padding: "8px 16px",
+          padding: "7px 16px",
           borderRadius: 999,
           background: done ? "rgba(22, 101, 52, 0.9)" : "rgba(15, 23, 42, 0.88)",
           border: `1.5px solid ${done ? "#4ade80" : mission.color}`,
           boxShadow: `0 8px 24px ${done ? "rgba(34, 197, 94, 0.3)" : "rgba(0,0,0,0.6)"}`,
           backdropFilter: "blur(10px)",
           color: "#fff",
-          fontSize: "0.88rem",
+          fontSize: "0.86rem",
           transition: "all 0.3s ease",
         }}
       >
@@ -296,6 +348,7 @@ function DailyMissionTracker() {
           onClick={() => {
             audio.bonus();
             c.completeDailyMission();
+            c.bus?.emit?.("greenhouseGrow");
           }}
           style={{
             animation: "pulse 1.2s infinite",
@@ -303,14 +356,14 @@ function DailyMissionTracker() {
             color: "#0f172a",
             fontWeight: 800,
             fontSize: "0.95rem",
-            padding: "10px 22px",
+            padding: "8px 20px",
             borderRadius: 999,
             border: "2px solid #fff",
             boxShadow: `0 0 20px ${mission.color}`,
             cursor: "pointer",
           }}
         >
-          :i-sparkles: {fr ? "Interagir avec l'objectif" : "Interact with objective"} :i-sparkles:
+          :i-sparkles: {mission.targetType === "greenhouse" ? (fr ? "Activer les cultures de la serre" : "Activate greenhouse crops") : (fr ? "Interagir avec l'objectif" : "Interact with objective")} :i-sparkles:
         </button>
       )}
     </div>
