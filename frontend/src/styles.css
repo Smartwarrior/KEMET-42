@@ -223,3 +223,8 @@ canvas { touch-action: none; }
   h1 { font-size: clamp(26px, 8vw, 40px); }
   h2 { font-size: clamp(18px, 5vw, 26px); }
 }
+
+/* Logo de mission KEMET-42 */
+.intro-logo { width: 110px; height: 110px; margin: 0 auto 10px; display: block; filter: drop-shadow(0 6px 20px rgba(79, 209, 197, 0.35)); transition: transform .3s ease; }
+.intro-logo:hover { transform: scale(1.05) rotate(2deg); }
+.brand-logo { width: 24px; height: 24px; border-radius: 6px; display: inline-block; vertical-align: -5px; margin-right: 8px; filter: drop-shadow(0 2px 6px rgba(246, 201, 69, 0.4)); }

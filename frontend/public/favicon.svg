@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="mars" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff7a45"/>
+      <stop offset="100%" stop-color="#9b2c12"/>
+    </linearGradient>
+    <linearGradient id="orb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#f6c945"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#070a14"/>
+  <circle cx="32" cy="34" r="18" fill="url(#mars)"/>
+  <ellipse cx="26" cy="28" rx="4" ry="2.5" fill="#ba3818" opacity="0.6"/>
+  <ellipse cx="38" cy="40" rx="5" ry="3" fill="#781d09" opacity="0.6"/>
+  <!-- Dôme -->
+  <path d="M 27 34 A 5 5 0 0 1 37 34 Z" fill="#e0f2fe"/>
+  <!-- Orbite -->
+  <ellipse cx="32" cy="34" rx="26" ry="10" fill="none" stroke="url(#orb)" stroke-width="2.2" transform="rotate(-26 32 34)"/>
+  <!-- Étoile -->
+  <circle cx="48" cy="14" r="2.5" fill="#f6c945"/>
+</svg>

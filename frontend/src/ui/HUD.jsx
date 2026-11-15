@@ -27,7 +27,7 @@ function TopBar() {
   const spent = c.planCost(plan), life = useGame((s) => s.life), delay = useGame((s) => s.commDelayMin), pending = useGame((s) => s.pendingTransmit);
   return (
     <header className="topbar">
-      <div className="brand"><span className="planet">:i-planet:</span><b>KEMET-42</b></div>
+      <div className="brand"><img src="/logo.svg" alt="Logo" className="brand-logo" /><b>KEMET-42</b></div>
       <div className="solbox">
         <div className="sol"><small>{t("sol")}</small> <b>{Math.min(game.day, 30)}</b><span>/30</span></div>
         <div className="pips">{Array.from({ length: 30 }, (_, i) => <i key={i} className={i + 1 < game.day ? "done" : i + 1 === game.day ? "now" : ""} />)}</div>

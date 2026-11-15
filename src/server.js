@@ -4,6 +4,7 @@
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
+const path = require('path');
 const { getDonkiSnapshot, donkiToAlert } = require('./donki');
 const { INCIDENTS, pickIncident } = require('./data/incidents');
 const { BODIES, CREW_RATES, PLANTS, SRC, ACCESS } = require('./data/science');
@@ -756,6 +757,18 @@ function randomDidYouKnow(destId) {
   ];
   return tips[Math.floor(Math.random() * tips.length)];
 }
+
+// Servir le frontend compilé en production (s'il existe)
+const distPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(distPath));
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/auth') && !req.path.startsWith('/scores')) {
+    return res.sendFile(path.join(distPath, 'index.html'), (err) => {
+      if (err) next();
+    });
+  }
+  next();
+});
 
 app.listen(PORT, () => {
   console.log(` Backend KEMET-42 sur http://localhost:${PORT}`);

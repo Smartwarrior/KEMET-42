@@ -45,6 +45,7 @@ export function Intro() {
         </button>
       </div>
       <div className="intro-center">
+        <img src="/logo.svg" alt="KEMET-42 Insignia" className="intro-logo" />
         <div className="eyebrow">NASA SPACE APPS CHALLENGE 2026</div>
         <h1>{t("title")}</h1>
         <p className="hello">{t("hello")}, <b>{useGame((s) => s.user)?.name}</b> · <button className="linkbtn" onClick={() => c.logout()}>{t("logout")}</button></p>
