@@ -16,7 +16,7 @@ export const SOURCES = SRC;
 
 export const BODIES = {
   moon: {
-    id: "moon", horizonsId: "301", src: SRC.moon, icon: "🌕", color: "#cfd3dc",
+    id: "moon", horizonsId: "301", src: SRC.moon, icon: ":i-moon:", color: "#cfd3dc",
     name: { fr: "La Lune", en: "The Moon" },
     facts: [
       { k: { fr: "Rayon moyen", en: "Mean radius" }, v: "1 737,4 km" },
@@ -29,7 +29,7 @@ export const BODIES = {
     ],
   },
   mars: {
-    id: "mars", horizonsId: "499", src: SRC.mars, icon: "🔴", color: "#e2552b",
+    id: "mars", horizonsId: "499", src: SRC.mars, icon: ":i-dot-red:", color: "#e2552b",
     name: { fr: "Mars", en: "Mars" },
     facts: [
       { k: { fr: "Rayon moyen", en: "Mean radius" }, v: "3 389,5 km" },
@@ -49,7 +49,7 @@ export const BODIES = {
 export const SITES = {
   mars: [
     {
-      id: "jezero", src: SRC.jezero, name: { fr: "Cratère Jezero", en: "Jezero Crater" }, icon: "🏞️",
+      id: "jezero", src: SRC.jezero, name: { fr: "Cratère Jezero", en: "Jezero Crater" }, icon: ":i-landscape:",
       known: [
         { fr: "Site d'atterrissage du rover Perseverance.", en: "Landing site of the Perseverance rover." },
         { fr: "Il y a plus de 3,5 milliards d'années, des canaux fluviaux ont débordé de la paroi du cratère et créé un lac.", en: "More than 3.5 billion years ago, river channels spilled over the crater wall and created a lake." },
@@ -60,7 +60,7 @@ export const SITES = {
       gameBonus: { res: "food", amount: 6, why: { fr: "Un ancien lac et des argiles : un site prometteur pour la science du vivant.", en: "An ancient lake and clays: a promising site for life science." } },
     },
     {
-      id: "gale", src: SRC.gale, name: { fr: "Cratère Gale · Mont Sharp", en: "Gale Crater · Mount Sharp" }, icon: "⛰️",
+      id: "gale", src: SRC.gale, name: { fr: "Cratère Gale · Mont Sharp", en: "Gale Crater · Mount Sharp" }, icon: ":i-mountain:",
       known: [
         { fr: "Cratère creusé par un impact massif il y a plus de 3 milliards d'années.", en: "Crater excavated by a massive impact more than 3 billion years ago." },
         { fr: "Le Mont Sharp est un empilement de couches de plus de 5 km (3 miles) de haut.", en: "Mount Sharp is a stack of layers more than 5 km (3 miles) high." },
@@ -73,7 +73,7 @@ export const SITES = {
   ],
   moon: [
     {
-      id: "shackleton", src: SRC.artemis, name: { fr: "Pic près de Shackleton", en: "Peak Near Shackleton" }, icon: "🏔️",
+      id: "shackleton", src: SRC.artemis, name: { fr: "Pic près de Shackleton", en: "Peak Near Shackleton" }, icon: ":i-mountain:",
       known: [
         { fr: "L'une des 13 régions candidates d'Artemis III, toutes à moins de 6° de latitude du pôle Sud lunaire.", en: "One of the 13 Artemis III candidate regions, all within 6° of latitude of the lunar South Pole." },
         { fr: "Chaque région mesure environ 15 × 15 km (9,3 × 9,3 miles).", en: "Each region is about 15 × 15 km (9.3 × 9.3 miles)." },
@@ -84,7 +84,7 @@ export const SITES = {
       gameBonus: { res: "energy", amount: 6, why: { fr: "Lumière solaire continue : l'énergie est abondante.", en: "Continuous sunlight: plenty of power." } },
     },
     {
-      id: "faustini", src: SRC.artemis, name: { fr: "Bord du cratère Faustini (A)", en: "Faustini Rim A" }, icon: "🕳️",
+      id: "faustini", src: SRC.artemis, name: { fr: "Bord du cratère Faustini (A)", en: "Faustini Rim A" }, icon: ":i-crater:",
       known: [
         { fr: "L'une des 13 régions candidates d'Artemis III près du pôle Sud lunaire (moins de 6° de latitude).", en: "One of the 13 Artemis III candidate regions near the lunar South Pole (within 6° of latitude)." },
         { fr: "Région d'environ 15 × 15 km contenant plusieurs sites d'atterrissage possibles.", en: "A region of about 15 × 15 km containing several potential landing sites." },
@@ -94,7 +94,7 @@ export const SITES = {
       gameBonus: { res: "o2", amount: 6, why: { fr: "La glace d'eau voisine peut fournir de l'oxygène.", en: "Nearby water ice can supply oxygen." } },
     },
     {
-      id: "malapert", src: SRC.artemis, name: { fr: "Massif Malapert", en: "Malapert Massif" }, icon: "🗻",
+      id: "malapert", src: SRC.artemis, name: { fr: "Massif Malapert", en: "Malapert Massif" }, icon: ":i-volcano:",
       known: [
         { fr: "L'une des 13 régions candidates d'Artemis III près du pôle Sud lunaire (moins de 6° de latitude).", en: "One of the 13 Artemis III candidate regions near the lunar South Pole (within 6° of latitude)." },
         { fr: "Région d'environ 15 × 15 km contenant plusieurs sites d'atterrissage possibles.", en: "A region of about 15 × 15 km containing several potential landing sites." },

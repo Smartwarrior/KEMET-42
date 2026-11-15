@@ -20,22 +20,23 @@ small{color:var(--mut)}
 .credits{justify-self:end;background:var(--glass);border:1px solid #f6c94566;color:#ffe9a8;padding:6px 14px;border-radius:999px;font-size:1.05rem;white-space:nowrap}.credits b{font-size:1.2rem}
 .tools{position:absolute;right:16px;top:calc(56px + var(--safe-t));display:flex;gap:8px}
 .icon{width:42px;height:42px;border-radius:12px;background:var(--glass);border:1px solid var(--line);font-size:1.1rem;backdrop-filter:blur(8px)}.icon:hover{background:var(--glass2)}
-/* --- jauges (gauche) --- */
-.gauges{position:absolute;left:16px;top:calc(76px + var(--safe-t));width:238px;display:flex;flex-direction:column;gap:10px}
-.gauge{background:var(--glass);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:14px;padding:10px 12px 8px;backdrop-filter:blur(10px);transition:box-shadow .3s}
-.gauge.warn{box-shadow:0 0 0 1px #f6c94577}.gauge.crit{box-shadow:0 0 18px #ff5c6a88;animation:crit 1s infinite}
-@keyframes crit{50%{background:rgba(70,16,24,.8)}}
-.g-head{display:flex;align-items:center;gap:8px}.g-ic{font-size:1.25rem}.g-name{flex:1;color:var(--c);font-weight:700;font-size:.92rem}.g-val{font-size:1.5rem}.g-val small{font-size:.8rem}
-.bar{position:relative;height:10px;border-radius:6px;background:#00000066;margin:7px 0 5px;overflow:visible}.bar i{position:absolute;inset:0 auto 0 0;border-radius:6px;background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 60%,#fff));transition:width .6s}
-.bar u{position:absolute;top:-3px;width:2px;height:16px;background:#fff;opacity:.75;border-radius:2px;transition:left .6s}
-.g-foot{display:flex;justify-content:space-between;font-size:.78rem}.up{color:var(--ok)}.down{color:var(--bad)}.eta{color:var(--acc2)}
-/* --- équipage (droite) --- */
-.crew{position:absolute;right:16px;top:calc(110px + var(--safe-t));width:226px;display:flex;flex-direction:column;gap:6px}
-.crew-card{display:grid;grid-template-columns:40px 1fr;grid-template-rows:auto auto;gap:0 10px;align-items:center;text-align:left;background:var(--glass);border:1px solid var(--line);border-right:4px solid var(--c,#888);border-radius:14px;padding:6px 10px;backdrop-filter:blur(10px)}
-.crew-card .helmet{grid-row:1/3}.crew-card b{font-size:.95rem}.crew-card small{display:block}.crew-card .st{grid-column:2;font-size:.76rem;color:var(--mut)}
-.crew-card.cmd{border-right-color:var(--c);cursor:default;background:linear-gradient(90deg,var(--glass),rgba(255,255,255,.05))}
-.crew-card:not(.cmd):hover,.crew-card.sel{background:var(--glass2)}.crew-card.warn .st{color:var(--acc2)}.crew-card.crit .st{color:var(--bad)}.crew-card.lost{opacity:.4;filter:grayscale(1)}
-.helmet.dead{filter:grayscale(1)}
+/* --- jauges (gauche) : design ultra-minimaliste et aéré sans bordures lourdes --- */
+.gauges{position:absolute;left:16px;top:calc(66px + var(--safe-t));width:210px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.gauge{background:rgba(8, 14, 26, 0.45);border:none;border-radius:8px;padding:6px 10px;backdrop-filter:blur(6px);transition:all .3s}
+.gauge.warn{background:rgba(246, 201, 69, 0.15)}.gauge.crit{background:rgba(255, 92, 106, 0.25);animation:crit 1s infinite}
+.g-head{display:flex;align-items:center;gap:6px}.g-ic{font-size:0.95rem}.g-name{flex:1;color:var(--c);font-weight:700;font-size:0.78rem;letter-spacing:0.04em;text-transform:uppercase}.g-val{font-size:0.85rem;color:#e2e8f0;font-weight:600}
+.bar{position:relative;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);margin:4px 0 2px;overflow:hidden}.bar i{position:absolute;inset:0 auto 0 0;border-radius:2px;background:var(--c);transition:width .6s}
+.bar u{display:none}
+
+/* --- équipage (droite) : mini badges compacts pour dégager la vue 3D --- */
+.crew{position:absolute;right:16px;top:calc(66px + var(--safe-t));width:auto;display:flex;flex-direction:row;gap:6px;pointer-events:auto}
+.crew-card{display:flex;align-items:center;gap:6px;background:rgba(8, 14, 26, 0.45);border:none;border-radius:999px;padding:4px 10px 4px 6px;backdrop-filter:blur(6px);cursor:pointer;transition:all .2s}
+.crew-card:hover{background:rgba(255,255,255,0.15)}
+.crew-card .helmet{width:24px;height:24px;font-size:0.9rem}
+.crew-card b{font-size:0.75rem;color:#e2e8f0}
+.crew-card .st{display:none}
+.crew-card small{display:none}
+.crew-card.cmd{display:none}
 /* --- dock (bas) --- */
 .dock{position:absolute;left:0;right:0;bottom:0;padding:0 16px calc(10px + var(--safe-b));display:flex;flex-direction:column;gap:8px;align-items:center;background:linear-gradient(transparent,#070a14dd 45%);pointer-events:none;padding-top:30px}
 .dock>*{pointer-events:auto}.dock.locked{opacity:.55;filter:saturate(.6)}
@@ -197,3 +198,28 @@ label,.lbl{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var
 /* Alerte : le bloc central ne passe plus sous les jauges/Nova (gauche) ni le panneau équipage (droite) */
 @media(min-width:1100px){.accident{left:348px;right:268px;margin:0;width:auto}}
 .nova-panel{max-height:calc(100vh - 470px);overflow:auto}
+
+/* --- KEMET-42 : sécurité (oxygène, DONKI), décollage, mobile & icônes SVG vectorielles --- */
+.ic { width: 1.1em; height: 1.1em; display: inline-block; vertical-align: -.2em; flex: none; }
+.o2-alert { position: fixed; top: calc(64px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 60; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; background: rgba(140, 75, 0, 0.9); color: #fff; border: 1.5px solid #ffb02e; backdrop-filter: blur(8px); }
+.o2-alert.critical { background: rgba(180, 20, 20, 0.92); border-color: #ff5d5d; animation: o2p .7s infinite alternate; }
+@keyframes o2p { to { transform: translateX(-50%) scale(1.05); } }
+.donki-btn { position: fixed; left: calc(16px + env(safe-area-inset-left)); bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 55; min-height: 38px; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); background: rgba(12,16,28,.8); color: #fff; font-size: 0.82rem; backdrop-filter: blur(8px); cursor: pointer; transition: background .2s; }
+.donki-btn:hover { background: rgba(255,255,255,.15); }
+.donki-panel { position: fixed; left: calc(16px + env(safe-area-inset-left)); bottom: calc(64px + env(safe-area-inset-bottom)); z-index: 56; width: min(340px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; padding: 14px; border-radius: 14px; background: rgba(10,14,24,.95); color: #fff; border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,.6); font-size: 0.85rem; }
+.donki-panel button { min-height: 34px; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.1); color: #fff; font-size: 0.8rem; margin-top: 8px; cursor: pointer; }
+.donki-panel ul { margin: 8px 0 8px 18px; }
+.donki-banner { margin: 8px 0; padding: 8px 12px; border-radius: 10px; background: rgba(140, 75, 0, 0.85); color: #fff; font-weight: 600; font-size: 0.85rem; }
+.countdown { font-size: clamp(64px, 20vw, 130px); font-weight: 900; letter-spacing: .04em; text-shadow: 0 0 30px #ffb02e; }
+.countdown.go { animation: o2p .4s infinite alternate; }
+html, body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+canvas { touch-action: none; }
+@media (max-width: 820px) {
+  button, .icon, .btn { min-height: 40px; min-width: 40px; }
+  .tools { gap: 6px; flex-wrap: wrap; }
+  .screen { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); overflow-y: auto; }
+  .donki-btn { bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .donki-panel { bottom: calc(124px + env(safe-area-inset-bottom)); }
+  h1 { font-size: clamp(26px, 8vw, 40px); }
+  h2 { font-size: clamp(18px, 5vw, 26px); }
+}

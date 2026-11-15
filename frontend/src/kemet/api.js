@@ -1,6 +1,6 @@
 /**
  * Couche d'accès au backend KEMET-42.
- * ⚠ Les routes ci-dessous sont une HYPOTHÈSE de contrat (REST + JWT) : à aligner sur le backend réel (voir README).
+ * :i-alert: Les routes ci-dessous sont une HYPOTHÈSE de contrat (REST + JWT) : à aligner sur le backend réel (voir README).
  *   VITE_API_URL défini  → appels HTTP réels.
  *   VITE_API_URL absent  → mode DÉMO local (comptes stockés dans le navigateur) pour pouvoir présenter l'application.
  */

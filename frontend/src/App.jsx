@@ -12,6 +12,8 @@ import { SpaceAgriculture } from "./ui/SpaceAgriculture.jsx";
 import { NovaPanel } from "./ui/Nova.jsx";
 import { INCIDENT_CATALOG } from "./data/incidents.js";
 import { audio } from "./ui/audio.js";
+import { DonkiDock, OxygenWatch } from "./ui/SafetyWatch.jsx";
+import { setGravity } from "./kemet/space.js";
 import { rt, resetEnts } from "./world/sim.js";
 import { HAZARDS } from "./game/layout.js";
 
@@ -21,6 +23,7 @@ const hasWebGL = () => { try { const c = document.createElement("canvas"); retur
 function Shell({ ctrl }) {
   const phase = useGame((s) => s.phase), lang = useGame((s) => s.lang), sound = useGame((s) => s.sound), quality = useGame((s) => s.quality), agriOpen = useGame((s) => s.agriOpen);
   const pendingEvent = useGame((s) => s.pendingEvent);
+  const destG = useGame((s) => s.dest); useEffect(() => { setGravity(destG); }, [destG]);
   const incident = pendingEvent ? INCIDENT_CATALOG.find((i) => i.id === pendingEvent.id) || null : null;
   const [low, setLow] = useState(false); const env = useGame((s) => s.env);
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
@@ -47,11 +50,12 @@ function Shell({ ctrl }) {
       {(phase === "plan") && <Tutorial />}
       {phase === "plan" && <Inspect />}
       {phase === "accident" && <Accident />}
-      {phase === "execute" && <div className="banner sweep" onClick={() => ctrl.skip()}>⏩ {lang === "fr" ? "Touchez pour accélérer" : "Tap to speed up"}</div>}
+      {phase === "execute" && <div className="banner sweep" onClick={() => ctrl.skip()}>:i-ff: {lang === "fr" ? "Touchez pour accélérer" : "Tap to speed up"}</div>}
       {phase === "resolve" && <ResolveBanner />}
       {phase === "summary" && <Summary />}
       {phase === "fact" && <Fact />}
       {phase === "end" && <End />}
+      {phase === "plan" && <><DonkiDock lang={lang} /><OxygenWatch lang={lang} /></>}
       <Settings />
       {agriOpen && <SpaceAgriculture onClose={() => ctrl.closeAgriculture()} />}
       {phase === "plan" && (

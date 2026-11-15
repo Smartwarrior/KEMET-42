@@ -28,6 +28,7 @@ class MissionVoiceAssistant {
 
   // Fonction pour parler
   speak(text, priority = false) {
+    text = String(text || "").replace(/:i-[a-z0-9-]+:/g, "").replace(/\s{2,}/g, " ").trim();
     if (!this.synth || !this.enabled || !text) return;
 
     // Si c'est une alerte urgente, on coupe ce qui était en train d'être dit

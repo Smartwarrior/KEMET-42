@@ -1,3 +1,6 @@
+import { useState as useStateT, useEffect as useEffectT } from "react";
+import { novaSpeak as novaSpeakT } from "./novaSpeak.js";
+import { transitPhase, transitLine } from "../kemet/space.js";
 import { useEffect, useState } from "react";
 import { useCtrl, useGame } from "../game/useStore.js";
 import { useT } from "./HUD.jsx";
@@ -12,8 +15,8 @@ import { LAYERS, SITE_COORDS, tileUrl, toXY, grid } from "../kemet/atlas.js";
 import { novaSpeak, stopNovaSpeak } from "./novaSpeak.js";
 
 const Btn = ({ children, onClick, kind = "primary", ...p }) => <button className={"btn " + kind} onClick={(e) => { audio.unlock(); audio.click(); onClick && onClick(e); }} {...p}>{children}</button>;
-const SrcLink = ({ src, t }) => <a className="srclink" href={src.url} target="_blank" rel="noreferrer">{t("srcLabel")} : {src.name}{src.updated ? ` · ${t("updatedLbl")} ${src.updated}` : ""} ↗</a>;
-const SKINS = ["#f1c27d", "#d9a066", "#a9703a", "#6b4426"], SUITS = ["#f1f3f8", "#ff9a3c", "#7fb2ff", "#8ce0a0"], VISORS = ["#2a1d0a", "#16407a", "#4a1a6a"], PATCHES = ["🌍", "🚀", "⭐", "🦅", "🐆", "☀️"];
+const SrcLink = ({ src, t }) => <a className="srclink" href={src.url} target="_blank" rel="noreferrer">{t("srcLabel")} : {src.name}{src.updated ? ` · ${t("updatedLbl")} ${src.updated}` : ""} :i-external:</a>;
+const SKINS = ["#f1c27d", "#d9a066", "#a9703a", "#6b4426"], SUITS = ["#f1f3f8", "#ff9a3c", "#7fb2ff", "#8ce0a0"], VISORS = ["#2a1d0a", "#16407a", "#4a1a6a"], PATCHES = [":i-earth:", ":i-rocket:", ":i-star:", ":i-eagle:", ":i-paw:", ":i-sun:"];
 
 /** Aperçu SVG de l'astronaute en cours d'habillage (mêmes couleurs que le personnage 3D). */
 export function SuitPreview({ suit, accent }) {
@@ -78,7 +81,7 @@ export function Hangar() {
             <label className="lbl">{t("displayName")}<input value={suit.name} maxLength={10} onChange={(e) => c.setSuit({ name: e.target.value })} /></label>
           </div>
         </div>
-        <div className="row between"><Btn kind="ghost" onClick={() => c.goIntro()}>← {t("back")}</Btn><Btn onClick={() => c.goLoadout()}>{t("next")} ▶</Btn></div>
+        <div className="row between"><Btn kind="ghost" onClick={() => c.goIntro()}>← {t("back")}</Btn><Btn onClick={() => c.goLoadout()}>{t("next")} :i-play:</Btn></div>
       </div>
     </div>
   );
@@ -100,7 +103,7 @@ export function Loadout() {
           </div>))}</div>
         <div className={"left" + (left === 0 ? " zero" : "")}>{t("pointsLeft")} : <b>{left}</b> <em>({t("gameRule")})</em></div>
         <p className="mut">{t("loadoutHint")}</p>
-        <div className="row between"><Btn kind="ghost" onClick={() => c.goHangar()}>← {t("back")}</Btn><Btn onClick={() => c.goDestination()}>{t("next")} ▶</Btn></div>
+        <div className="row between"><Btn kind="ghost" onClick={() => c.goHangar()}>← {t("back")}</Btn><Btn onClick={() => c.goDestination()}>{t("next")} :i-play:</Btn></div>
       </div>
     </div>
   );
@@ -120,7 +123,7 @@ function BodyCard({ b, onPick }) {
       <div className="hz">{hz === null ? <small>…</small> : hz.ok ? <><b>{fmt(hz.km)} km</b> <small>({fmt(hz.au, 3)} UA · {t("distLive")} {hz.date})</small><div>{t("lightTime")} <b>{fmt(hz.lightMin, 1)} {t("minutes")}</b></div></> : <small>{t("distOffline")}</small>}<div className="hzt">{t("distNow")}</div></div>
       <dl>{b.facts.map((f, i) => <div key={i}><dt>{L(f.k, lang)}</dt><dd>{typeof f.v === "string" ? f.v : L(f.v, lang)}</dd></div>)}</dl>
       <SrcLink src={b.src} t={t} />
-      <Btn onClick={onPick}>{t("chooseBody", { name: L(b.name, lang) })} ▶</Btn>
+      <Btn onClick={onPick}>{t("chooseBody", { name: L(b.name, lang) })} :i-play:</Btn>
     </div>
   );
 }
@@ -157,8 +160,8 @@ export function Destination() {
             <thead>
               <tr>
                 <th>{fr ? "Critère" : "Criterion"}</th>
-                <th>🌕 {fr ? "Lune" : "Moon"}</th>
-                <th>🔴 Mars</th>
+                <th>:i-moon: {fr ? "Lune" : "Moon"}</th>
+                <th>:i-dot-red: Mars</th>
               </tr>
             </thead>
             <tbody>
@@ -201,7 +204,7 @@ export function SiteStep() {
     <div className="screen kemet-step">
       <div className="panel step wide3">
         <div className="eyebrow">4 / 4 · {L(BODIES[dest].name, lang)}</div><h2>{t("siteTitle")}</h2><p className="mut">{t("siteSub")}</p>
-        <div className="mission-constraints"><b>🧭 {lang === "fr" ? "Avant le départ : contraintes réelles" : "Before launch: real constraints"}</b><span>🫁 {lang === "fr" ? "Atmosphère : " : "Atmosphere: "}{dest === "mars" ? "95,1 % CO₂ · pression 6,36 mb" : "vide spatial (atmosphère extrêmement ténue)"}</span><span>☀️ {lang === "fr" ? "Jour : " : "Day: "}{dest === "mars" ? "24,6597 h (un sol)" : "≈ 14 jours de jour / 14 jours de nuit"}</span><span>📡 {lang === "fr" ? "Délai aller simple : " : "One-way delay: "}{dest === "mars" ? "environ 3–22 min selon la position" : "≈ 1,3 s"}</span><small>{lang === "fr" ? "Les valeurs scientifiques sont sourcées ci-dessous. Les bonus restent des règles de jeu." : "Scientific values are sourced below. Bonuses remain game rules."}</small></div>
+        <div className="mission-constraints"><b>:i-compass: {lang === "fr" ? "Avant le départ : contraintes réelles" : "Before launch: real constraints"}</b><span>:i-lungs: {lang === "fr" ? "Atmosphère : " : "Atmosphere: "}{dest === "mars" ? "95,1 % CO₂ · pression 6,36 mb" : "vide spatial (atmosphère extrêmement ténue)"}</span><span>:i-sun: {lang === "fr" ? "Jour : " : "Day: "}{dest === "mars" ? "24,6597 h (un sol)" : "≈ 14 jours de jour / 14 jours de nuit"}</span><span>:i-antenna: {lang === "fr" ? "Délai aller simple : " : "One-way delay: "}{dest === "mars" ? "environ 3–22 min selon la position" : "≈ 1,3 s"}</span><small>{lang === "fr" ? "Les valeurs scientifiques sont sourcées ci-dessous. Les bonus restent des règles de jeu." : "Scientific values are sourced below. Bonuses remain game rules."}</small></div>
         <AtlasMap dest={dest} sites={sites} site={site} onPick={(id) => { audio.click(); c.pickSite(id); }} lang={lang} />
         {dest === "moon" && <small className="mut">{lang === "fr" ? "Projection plate : près du pôle Sud, les sites sont écrasés sur le bord bas de la carte." : "Flat projection: near the South Pole, sites are squashed along the bottom edge."}</small>}
         <div className="site-grid">
@@ -214,7 +217,7 @@ export function SiteStep() {
             <SrcLink src={cur.src} t={t} />
           </>) : <p className="mut">←</p>}</div>
         </div>
-        <div className="row between"><Btn kind="ghost" onClick={() => c.goDestination()}>← {t("back")}</Btn><Btn disabled={!site} onClick={() => { audio.ok(); c.startTransit(); }}>🚀 {t("launchBtn")}</Btn></div>
+        <div className="row between"><Btn kind="ghost" onClick={() => c.goDestination()}>← {t("back")}</Btn><Btn disabled={!site} onClick={() => { audio.ok(); c.startTransit(); }}>:i-rocket: {t("launchBtn")}</Btn></div>
       </div>
     </div>
   );
@@ -222,11 +225,14 @@ export function SiteStep() {
 
 export function Transit() {
   const c = useCtrl(), t = useT(); const lang = useGame((s) => s.lang), dest = useGame((s) => s.dest), site = useGame((s) => s.site);
+  const [sec, setSec] = useStateT(0); useEffectT(() => { const t0 = Date.now(), id = setInterval(() => setSec((Date.now() - t0) / 1000), 200); return () => clearInterval(id); }, []);
+  const ph = transitPhase(sec); useEffectT(() => { const l = transitLine(ph, dest, lang); if (l) novaSpeakT(l, lang); }, [ph.key]);
   const b = BODIES[dest], st = (SITES[dest] || []).find((x) => x.id === site);
   return (
     <div className="screen transit" onClick={() => c.skipTransit()}>
       <div className="stars" />
-      <div className="route"><span className="earth">🌍</span><div className="track"><i className="rocket">🚀</i></div><span className="target" style={{ filter: `drop-shadow(0 0 14px ${b.color})` }}>{b.icon}</span></div>
+      <div className="route"><span className="earth">:i-earth:</span><div className="track"><i className="rocket">:i-rocket:</i></div><span className="target" style={{ filter: `drop-shadow(0 0 14px ${b.color})` }}>{b.icon}</span></div>
+      {ph.name === "count" && <div className="countdown">T-{ph.n}</div>}{ph.name === "lift" && <div className="countdown go">:i-rocket:</div>}
       <h2>{t("transitTitle")}</h2><p>{t("transitText", { name: L(b.name, lang) })}</p><p className="mut">{t("landed", { site: st ? L(st.name, lang) : "" })}</p>
       <small className="skip">{t("transitSkip")} ▸</small>
     </div>
@@ -270,7 +276,7 @@ export function Quiz() {
   return (
     <div className="screen center quiz-screen">
       <div className="panel quiz">
-        <div className="eyebrow">🎓 {t("quizTitle")}</div>
+        <div className="eyebrow">:i-cap: {t("quizTitle")}</div>
         <h2>{q.q}</h2>
         <div className="qopts">
           {q.options.map((o, i) => (
@@ -290,7 +296,7 @@ export function Quiz() {
         </div>
         {done && (
           <div className={"qres " + (q.right ? "good" : "bad")}>
-            <b>{q.right ? "✔ " + t("quizRight") : "✖ " + t("quizWrong")}</b>
+            <b>{q.right ? ":i-check: " + t("quizRight") : ":i-x: " + t("quizWrong")}</b>
             <p>{q.why}</p>
             <SrcLink src={q.src} t={t} />
             {life <= 0 && <p className="lostline">{t("quizLifeOut")}</p>}
@@ -298,7 +304,7 @@ export function Quiz() {
         )}
         {done && (
           <div className="row">
-            <Btn onClick={() => c.continueQuiz()}>{t("quizNext")} ▶</Btn>
+            <Btn onClick={() => c.continueQuiz()}>{t("quizNext")} :i-play:</Btn>
           </div>
         )}
       </div>
@@ -315,12 +321,12 @@ export function CargoStep() {
         <div className="eyebrow">2 / 4 · {lang === "fr" ? "Cargaison" : "Cargo"}</div>
         <h2>{lang === "fr" ? "Choisissez votre cargaison" : "Choose your cargo"}</h2>
         <p className="mut">{lang === "fr" ? "Liste fournie par le serveur KEMET-42 (GET /briefing). Elle sera envoyée au lancement." : "List provided by the KEMET-42 server (GET /briefing). Sent at launch."}</p>
-        {busy && <p>⏳ …</p>}
-        {err && <p className="mut">⚠ {lang === "fr" ? "Serveur injoignable. Vérifiez que le backend tourne sur le port 3000." : "Server unreachable. Check the backend on port 3000."} <Btn kind="ghost" onClick={() => c.loadBriefing()}>↻</Btn></p>}
+        {busy && <p>:i-hourglass: …</p>}
+        {err && <p className="mut">:i-alert: {lang === "fr" ? "Serveur injoignable. Vérifiez que le backend tourne sur le port 3000." : "Server unreachable. Check the backend on port 3000."} <Btn kind="ghost" onClick={() => c.loadBriefing()}>↻</Btn></p>}
         <div className="loadout">{(b?.cargo || []).map((x) => { const on = cargo.includes(x.id); return (
           <button key={x.id} className={"lo-row" + (on ? " on" : "")} onClick={() => { audio.click(); c.toggleCargo(x.id); }} style={{ textAlign: "left", opacity: on ? 1 : 0.7, outline: on ? "2px solid #5ad6ff" : "none" }}>
-            <span className="lo-ic">{on ? "✔" : "📦"}</span><div className="lo-txt"><b>{x.name}</b>{x.description && <small>{x.description}</small>}{x.mass !== undefined && <small>{x.mass} kg</small>}</div></button>); })}</div>
-        <div className="row between"><Btn kind="ghost" onClick={() => c.goHangar()}>← {t("back")}</Btn><Btn onClick={() => c.goDestination()}>{t("next")} ▶</Btn></div>
+            <span className="lo-ic">{on ? ":i-check:" : ":i-box:"}</span><div className="lo-txt"><b>{x.name}</b>{x.description && <small>{x.description}</small>}{x.mass !== undefined && <small>{x.mass} kg</small>}</div></button>); })}</div>
+        <div className="row between"><Btn kind="ghost" onClick={() => c.goHangar()}>← {t("back")}</Btn><Btn onClick={() => c.goDestination()}>{t("next")} :i-play:</Btn></div>
       </div>
     </div>
   );

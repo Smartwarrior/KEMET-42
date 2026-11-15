@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { rt } from "./sim.js";
+import { gravity, floatParams } from "../kemet/space.js";
 
 const white = new THREE.MeshStandardMaterial({ color: "#f1f3f8", roughness: 0.55, metalness: 0.05 });
 const grey = new THREE.MeshStandardMaterial({ color: "#8b93a3", roughness: 0.6, metalness: 0.2 });
@@ -37,6 +38,7 @@ export function Astronaut({ ent, skin, pack, accent, suit = "#f1f3f8", visor = "
     else if (pose === "crouch") { aL = aR = -0.4; lL = lR = 0.9; sink = 0.22; lean = 0.35; }
     else if (pose === "dead") { aL = 0.4; aR = -0.3; lL = lR = 0; }
     legL.current.rotation.x = lL; legR.current.rotation.x = lR; armL.current.rotation.x = aL; armR.current.rotation.x = aR;
+    if (pose !== "dead") { const fp = floatParams(gravity.frac); bob = bob * fp.bobScale + fp.lift * (0.65 + 0.35 * Math.sin(t * 1.3 + e.idx)); }
     body.current.rotation.x = lean; body.current.rotation.z = roll; body.current.position.y = 0.98 + bob + jump - sink;
     head.current.rotation.y = headTurn;
     eyes.current.scale.setScalar(eyeS);

@@ -20,7 +20,7 @@ export function Intro() {
     <div className="screen intro">
       <div className="intro-top">
         <div className="voice-choice" aria-label={lang === "fr" ? "Langue de la voix de Nova" : "Nova voice language"}>
-          <span>🤖 {lang === "fr" ? "Voix Nova" : "Nova voice"}</span>
+          <span>:i-robot: {lang === "fr" ? "Voix Nova" : "Nova voice"}</span>
           <button
             className={lang === "fr" ? "on" : ""}
             onClick={() => {
@@ -41,7 +41,7 @@ export function Intro() {
           </button>
         </div>
         <button className="icon" onClick={() => { c.toggleSound(); }}>
-          {useGame((s) => s.sound) ? "🔊" : "🔇"}
+          {useGame((s) => s.sound) ? ":i-speaker:" : ":i-speaker-off:"}
         </button>
       </div>
       <div className="intro-center">
@@ -50,12 +50,12 @@ export function Intro() {
         <p className="hello">{t("hello")}, <b>{useGame((s) => s.user)?.name}</b> · <button className="linkbtn" onClick={() => c.logout()}>{t("logout")}</button></p>
         <p className="tag">{t("tagline")}</p>
         <div className="intro-btns">
-          <Btn onClick={() => c.goHangar()}>🚀 {t("newMission")}</Btn>
+          <Btn onClick={() => c.goHangar()}>:i-rocket: {t("newMission")}</Btn>
           {hasSave && <Btn kind="ghost" onClick={() => c.resume()}>↻ {t("resume")}</Btn>}
         </div>
-        {best > 0 && <p className="best">🏆 {t("best")} : {best}</p>}
+        {best > 0 && <p className="best">:i-trophy: {t("best")} : {best}</p>}
       </div>
-      <ul className="how"><li><span>🕹️</span>{t("how1")}</li><li><span>🏗️</span>{t("how2")}</li><li><span>⚠️</span>{t("how3")}</li></ul>
+      <ul className="how"><li><span>:i-joystick:</span>{t("how1")}</li><li><span>:i-crane:</span>{t("how2")}</li><li><span>:i-alert:</span>{t("how3")}</li></ul>
     </div>
   );
 }
@@ -71,7 +71,7 @@ export function Briefing() {
         <div className="res-expl">{Object.entries(RES).map(([k, r]) => <div key={k} style={{ "--c": r.color }}><span>{r.icon}</span><b>{t(r.key)}</b><small>{t({ o2: "resO2Desc", energy: "resEnergyDesc", food: "resFoodDesc", protection: "resProtDesc" }[k])}</small></div>)}</div>
         <h3>{t("yourCallsign")}</h3>
         <div className="callsigns">{Object.entries(CALLSIGN_COLORS).map(([n, col]) => <button key={n} className={"chip" + (n === callsign ? " on" : "")} style={{ "--c": col }} onClick={() => { audio.click(); c.setCallsign(n); }}><i />{n}</button>)}</div>
-        <div className="brief-actions"><Btn kind="ghost" onClick={() => c.goIntro()}>← {t("back")}</Btn><Btn onClick={() => { audio.ok(); c.launch(); }}>{t("btnLaunchMission")} ▶</Btn></div>
+        <div className="brief-actions"><Btn kind="ghost" onClick={() => c.goIntro()}>← {t("back")}</Btn><Btn onClick={() => { audio.ok(); c.launch(); }}>{t("btnLaunchMission")} :i-play:</Btn></div>
       </div>
     </div>
   );
@@ -122,14 +122,14 @@ export function Accident() {
   return (
     <div className={"accident" + (ev.negative ? " bad" : " good")}>
       <div className="acc-banner">
-        <span className="acc-ic">{EVENT_ICON[ev.id] || "⚠"}</span>
+        <span className="acc-ic">{EVENT_ICON[ev.id] || ":i-alert:"}</span>
         <div style={{ flex: 1 }}>
-          <small>{ev.negative ? "⚠ " + t("accident") : "✦ " + t("eventTitle")} · {urgency}</small>
+          <small>{ev.negative ? ":i-alert: " + t("accident") : "✦ " + t("eventTitle")} · {urgency}</small>
           <p style={{ fontWeight: 700, fontSize: "1.05rem", margin: "2px 0 4px" }}>{L(ev.text, lang)}</p>
           <div className="incident-type">{evName} · {fr ? "protocole guidé" : "guided protocol"}</div>
         </div>
         <div className="inc-timer" title={fr ? "Compte à rebours = règle de jeu" : "Countdown = game rule"}>
-          ⏱ {timeLeft}s
+          :i-timer: {timeLeft}s
           <small>{fr ? "règle de jeu" : "game rule"}</small>
         </div>
       </div>
@@ -141,7 +141,7 @@ export function Accident() {
           {cat.source?.url && (
             <p style={{ margin: "4px 0 0", fontSize: "0.74rem" }}>
               <a href={cat.source.url} target="_blank" rel="noreferrer" style={{ color: "#7de8ff" }}>
-                {cat.source.name || "NASA"} ↗ (source officielle NASA)
+                {cat.source.name || "NASA"} :i-external: (source officielle NASA)
               </a>
             </p>
           )}
@@ -150,7 +150,7 @@ export function Accident() {
 
       <div className="incident-protocol">
         <div className="protocol-head">
-          <b>🤖 NOVA</b>
+          <b>:i-robot: NOVA</b>
           <span>{fr ? "étape" : "step"} {activeStep + 1}/3</span>
         </div>
         <div className="protocol-steps">
@@ -163,14 +163,14 @@ export function Accident() {
         </div>
         {(ev.id === "dust_storm" || ev.id === "solar_flare" || cat?.shelterRequired || cat?.shelterRecommended) && (
           <button className="shelter-btn" onClick={() => { c.enterShelter?.(); setShelterOpen(true); }}>
-            🏠 {fr ? "Voir l’intérieur de l’abri" : "View shelter interior"}
+            :i-home: {fr ? "Voir l’intérieur de l’abri" : "View shelter interior"}
           </button>
         )}
       </div>
 
       {hz?.bonus && (
         <div className={"bonus" + (reached ? " got" : "")} style={{ margin: "6px auto" }}>
-          {reached ? "✔ " + t("intervened", { res }) : "🎯 " + t("intervene", { res })}
+          {reached ? ":i-check: " + t("intervened", { res }) : ":i-target: " + t("intervene", { res })}
         </div>
       )}
 
@@ -181,7 +181,7 @@ export function Accident() {
             style={{ minWidth: 200, padding: "12px 24px", fontSize: "1.05rem" }}
             onClick={() => { audio.ok(); c.ackAlert(); }}
           >
-            <b>{lang === "fr" ? "Continuer" : "Continue"} ▶</b>
+            <b>{lang === "fr" ? "Continuer" : "Continue"} :i-play:</b>
           </button>
         </div>
       )}
@@ -190,7 +190,7 @@ export function Accident() {
         <div className="choices">
           <small>{t("chooseResponse")}</small>
           <button className="coach-help" onClick={() => setHelpOpen((v) => !v)}>
-            🤖 {helpOpen ? (fr ? "Masquer l’aide" : "Hide help") : (fr ? "NOVA, aide-moi" : "NOVA, help me")}
+            :i-robot: {helpOpen ? (fr ? "Masquer l’aide" : "Hide help") : (fr ? "NOVA, aide-moi" : "NOVA, help me")}
           </button>
           {helpOpen && (
             <div className="help-tip">
@@ -207,7 +207,7 @@ export function Accident() {
                 <button key={ch.id} className={"choice " + (ch.risk || "")} disabled={poor} onClick={() => { audio.ok(); c.chooseEvent(ch.id); }}>
                   <b>{L(ch.label, lang)}</b>
                   <div className="eff">{eff.map(([k, v]) => <span key={k} className={v > 0 ? "up" : "down"} style={{ "--c": RES[k].color }}>{RES[k].icon} {v > 0 ? "+" : ""}{v}</span>)}</div>
-                  <div className="meta"><span>{ch.cost ? `🪙 −${ch.cost}` : t("free0")}</span><span className={"risk " + ch.risk}>{t("risk_" + (ch.risk || "low"))}</span></div>
+                  <div className="meta"><span>{ch.cost ? `:i-coin: −${ch.cost}` : t("free0")}</span><span className={"risk " + ch.risk}>{t("risk_" + (ch.risk || "low"))}</span></div>
                 </button>
               );
             })}
@@ -296,16 +296,16 @@ export function Summary() {
         {effects && (
           <div className="tradeoff" style={{ margin: "8px 0 12px", padding: "8px 10px", background: "#ffffff10", borderRadius: 8, fontSize: 13 }}>
             <b>{t("tradeoffTitle")}</b>
-            {effects.cost > 0 && <div>{t("tradeoffCost")} : 🪙 {effects.cost}</div>}
+            {effects.cost > 0 && <div>{t("tradeoffCost")} : :i-coin: {effects.cost}</div>}
             <div>{t("tradeoffEffect")} : {Object.entries(effects.effects || {}).filter(([, v]) => v).map(([k, v]) => `${v > 0 ? "+" : ""}${v} ${t(RES[k]?.key || k)}`).join(" · ") || "—"}</div>
-            {effects.risk === "high" && <div style={{ color: "#ff8a8a" }}>⚠ {t("riskyMsg")}</div>}
+            {effects.risk === "high" && <div style={{ color: "#ff8a8a" }}>:i-alert: {t("riskyMsg")}</div>}
           </div>
         )}
         <div className="deltas">{Object.entries(RES).map(([k, r]) => <div key={k} style={{ "--c": r.color }} className={d[k] > 0 ? "up" : d[k] < 0 ? "down" : ""}><span>{r.icon}</span><small>{t(r.key)}</small><b>{d[k] > 0 ? "+" : ""}{d[k]}</b><em>{game.resources[k]}%</em></div>)}</div>
-        {useGame((s) => s.riskyChoice) && <p className="lostline">⚠ {t("riskyMsg")}</p>}
-        {bonus && <p className="bonusline">🎯 {t("bonusMsg", { res: t(RES[bonus].key) })}</p>}
-        {toast === "transmit" && <p className="bonusline">📡 {t("transmitSent", { n: delay || 14 })}</p>}
-        {lost > 0 && <p className="lostline">💔 {t("crewLostMsg", { n: game.crew })}</p>}
+        {useGame((s) => s.riskyChoice) && <p className="lostline">:i-alert: {t("riskyMsg")}</p>}
+        {bonus && <p className="bonusline">:i-target: {t("bonusMsg", { res: t(RES[bonus].key) })}</p>}
+        {toast === "transmit" && <p className="bonusline">:i-antenna: {t("transmitSent", { n: delay || 14 })}</p>}
+        {lost > 0 && <p className="lostline">:i-heart-broken: {t("crewLostMsg", { n: game.crew })}</p>}
         <p className="tapc">{t("tapContinue")}</p>
       </div>
     </div>
@@ -319,14 +319,14 @@ export function Fact() {
   return (
     <div className="screen center">
       <div className="panel fact">
-        <div className="eyebrow">🔭 {t("didYouKnow")}</div>
+        <div className="eyebrow">:i-telescope: {t("didYouKnow")}</div>
         {!detail ? (<>
           <p className="fact-text">{L(f.text, lang)}</p>
           <div className="bignum">{f.value}<small>{f.unit}</small></div>
           <div className="row"><Btn kind="ghost" onClick={() => setDetail(true)}>{t("seeData")}</Btn><Btn onClick={() => c.continueFact()}>{t("understood")}</Btn></div>
         </>) : (<>
-          <dl className="datalist"><dt>{t("usedFor")}</dt><dd>{L(f.used_for, lang)}</dd><dt>{t("source")}</dt><dd>{f.source_name}{" "}<span className={"vb " + (f.verified ? "ok" : "")}>{f.verified ? "✔ " + t("verified") : "⚠ " + t("unverified")}</span></dd><dt>{t("accessed")}</dt><dd>{f.accessed}</dd></dl>
-          <div className="row"><Btn kind="ghost" onClick={() => setDetail(false)}>← {t("back")}</Btn>{f.source_url && <a className="btn ghost" href={f.source_url} target="_blank" rel="noreferrer">{t("visit")} ↗</a>}</div>
+          <dl className="datalist"><dt>{t("usedFor")}</dt><dd>{L(f.used_for, lang)}</dd><dt>{t("source")}</dt><dd>{f.source_name}{" "}<span className={"vb " + (f.verified ? "ok" : "")}>{f.verified ? ":i-check: " + t("verified") : ":i-alert: " + t("unverified")}</span></dd><dt>{t("accessed")}</dt><dd>{f.accessed}</dd></dl>
+          <div className="row"><Btn kind="ghost" onClick={() => setDetail(false)}>← {t("back")}</Btn>{f.source_url && <a className="btn ghost" href={f.source_url} target="_blank" rel="noreferrer">{t("visit")} :i-external:</a>}</div>
         </>)}
       </div>
     </div>
@@ -357,9 +357,9 @@ export function End() {
   return (
     <div className="screen end">
       <div className={"panel endcard " + (g.success ? "win" : "lose")}>
-        <div className="eyebrow">{g.success ? "🚀" : "🛰️"} {t(g.success ? "victoryDesc" : g.endReason === "life" ? "endLife" : "defeatDesc")}</div>
+        <div className="eyebrow">{g.success ? ":i-rocket:" : ":i-satellite:"} {t(g.success ? "victoryDesc" : g.endReason === "life" ? "endLife" : "defeatDesc")}</div>
         <h2>{t(g.success ? "victory" : "defeat")}</h2>
-        <div className="scorebig"><b>{sc.total}</b><small>/ 850</small><span className="rank">🎖️ {t("rank_" + sc.rank)}</span></div>
+        <div className="scorebig"><b>{sc.total}</b><small>/ 850</small><span className="rank">:i-medal: {t("rank_" + sc.rank)}</span></div>
         <div className="breakdown"><div><small>{t("scoreCrew")}</small><b>{sc.crewScore}</b></div><div><small>{t("scoreDays")}</small><b>{sc.daysScore}</b></div><div><small>{t("scoreResources")}</small><b>{sc.resScore}</b></div><div><small>{t("scoreBudget")}</small><b>{sc.budgetScore}</b></div></div>
         <h3>{t("curves")}</h3><Curves history={g.history} />
         <div className="legend">{Object.entries(RES).map(([k, r]) => <span key={k} style={{ color: r.color }}>● {t(r.key)}</span>)}</div>
@@ -373,8 +373,8 @@ export function End() {
             <li>Jezero Crater · Gale Crater · Artemis III candidate regions</li>
           </ul>
         </div>
-        <p className="best">🏆 {t("best")} : {best}</p>
-        <div className="row"><Btn onClick={() => c.launch()}>↻ {t("replay")}</Btn><Btn kind="ghost" onClick={share}>{copied ? t("copied") : "↗ " + t("share")}</Btn><Btn kind="ghost" onClick={() => c.goIntro()}>{t("home")}</Btn></div>
+        <p className="best">:i-trophy: {t("best")} : {best}</p>
+        <div className="row"><Btn onClick={() => c.launch()}>↻ {t("replay")}</Btn><Btn kind="ghost" onClick={share}>{copied ? t("copied") : ":i-external: " + t("share")}</Btn><Btn kind="ghost" onClick={() => c.goIntro()}>{t("home")}</Btn></div>
       </div>
     </div>
   );
@@ -387,7 +387,7 @@ export function Inspect() {
     <div className="inspect panel"><button className="x" onClick={() => c.inspect(null)}>✕</button>
       <div className="ins-h"><span>{ACT_ICON[a.id]}</span><div><b>{L(a.name, lang)}</b><small>{t("moduleCount", { n })}</small></div></div>
       <p>{L(a.description, lang)}</p>
-      {phase === "plan" && n < 4 && <Btn onClick={() => { c.inspect(null); c.beginPlacing(a.id); }}>{t("inspectBuild")} · 🪙 {a.cost}</Btn>}
+      {phase === "plan" && n < 4 && <Btn onClick={() => { c.inspect(null); c.beginPlacing(a.id); }}>{t("inspectBuild")} · :i-coin: {a.cost}</Btn>}
     </div>
   );
 }

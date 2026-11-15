@@ -14,7 +14,7 @@ import { getMissionForSol } from "../kemet/dailyMissions.js";
 export const SAVE_KEY = "mm30_3d_save_v1";
 const BONUS_AMOUNT = 4;
 export const RULES = { life: 100, quizWrong: 15, riskyChoice: 10, quizRightCredits: 15, loadoutTotal: 320, loadoutMin: 30, loadoutMax: 100 };
-const DEFAULT_SUIT = { skin: "#d9a066", suit: "#f1f3f8", visor: "#2a1d0a", patch: "🌍", name: "" };
+const DEFAULT_SUIT = { skin: "#d9a066", suit: "#f1f3f8", visor: "#2a1d0a", patch: ":i-earth:", name: "" };
 
 export function createBus() {
   const map = new Map();
@@ -139,7 +139,7 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
     playAsGuest() {
       store.set({ user: { name: "Commandant", guest: true }, phase: "intro", authError: null });
     },
-    startTransit() { if (!g().site) return; store.set({ phase: "transit" }); later(() => api_launch(), 6500); },
+    startTransit() { if (!g().site) return; store.set({ phase: "transit" }); later(() => api_launch(), 14000); },
     skipTransit() { if (g().phase === "transit") { clearTimers(); api_launch(); } },
     // ----- questions & durée de vie -----
     answerQuiz(i) {

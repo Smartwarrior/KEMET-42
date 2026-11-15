@@ -95,10 +95,10 @@ export function NovaPanel({
   if (minimized) {
     return (
       <div className="nova-panel nova-mini" role="complementary" aria-label="NOVA" onClick={() => setMinimized(false)}>
-        <span className="nova-avatar" aria-hidden>🤖</span>
+        <span className="nova-avatar" aria-hidden>:i-robot:</span>
         <b style={{ color: "#4fd1c5" }}>NOVA</b>
         <button type="button" className="icon" onClick={(e) => { e.stopPropagation(); toggleVoice(); }} title={voiceOn ? "muet" : "voix"}>
-          {voiceOn ? "🔊" : "🔇"}
+          {voiceOn ? ":i-speaker:" : ":i-speaker-off:"}
         </button>
         <span style={{ fontSize: 11, color: "#d7e2f5", marginLeft: "auto", cursor: "pointer" }}>▲ {fr ? "Agrandir" : "Expand"}</span>
       </div>
@@ -108,7 +108,7 @@ export function NovaPanel({
   return (
     <div className="nova-panel" role="complementary" aria-label="NOVA">
       <div className="nova-head">
-        <span className="nova-avatar" aria-hidden>🤖</span>
+        <span className="nova-avatar" aria-hidden>:i-robot:</span>
         <div>
           <strong>NOVA</strong>
           <div className="mut" style={{ fontSize: 11 }}>
@@ -116,7 +116,7 @@ export function NovaPanel({
           </div>
         </div>
         <button type="button" className="icon" onClick={toggleVoice} title={voiceOn ? "mute" : "voice"}>
-          {voiceOn ? "🔊" : "🔇"}
+          {voiceOn ? ":i-speaker:" : ":i-speaker-off:"}
         </button>
         <button type="button" className="icon" onClick={() => setMinimized(true)} title={fr ? "Réduire" : "Minimize"}>
           —
@@ -216,7 +216,7 @@ export function IncidentPanel({
         </span>
         <h3>{L(incident.title, lang)}</h3>
         <div className="inc-timer" title={fr ? "Temps du jeu (pas un vrai temps NASA)" : "Game timer (not a real NASA time)"}>
-          ⏱ {Math.max(0, Math.ceil(timeLeft))}s
+          :i-timer: {Math.max(0, Math.ceil(timeLeft))}s
           <small>{fr ? "temps du jeu" : "game time"}</small>
         </div>
       </div>
@@ -275,12 +275,12 @@ export function ShelterView({ lang = "fr", resources = {}, incident = null, onEx
             : "Here we are safe from wind, dust and some dangerous rays."}
         </p>
         <ul className="shelter-grid">
-          <li>🚪 {fr ? "Porte" : "Door"} — OK</li>
-          <li>🛏 {fr ? "Coin pour se reposer" : "Rest area"} — OK</li>
-          <li>🫁 {fr ? "Air" : "Air"} — {resources.o2 ?? resources.oxygenKg ?? "—"}</li>
-          <li>🔋 {fr ? "Énergie" : "Power"} — {resources.energy ?? resources.powerKwh ?? "—"}</li>
-          <li>🛡 {fr ? "Bouclier" : "Shield"} — {resources.protection ?? resources.radiationShield ?? "—"}%</li>
-          <li>🚨 {fr ? "Alerte" : "Alert"} — {incident ? L(incident.title, lang) : fr ? "aucune" : "none"}</li>
+          <li>:i-door: {fr ? "Porte" : "Door"} — OK</li>
+          <li>:i-bed: {fr ? "Coin pour se reposer" : "Rest area"} — OK</li>
+          <li>:i-lungs: {fr ? "Air" : "Air"} — {resources.o2 ?? resources.oxygenKg ?? "—"}</li>
+          <li>:i-battery: {fr ? "Énergie" : "Power"} — {resources.energy ?? resources.powerKwh ?? "—"}</li>
+          <li>:i-shield: {fr ? "Bouclier" : "Shield"} — {resources.protection ?? resources.radiationShield ?? "—"}%</li>
+          <li>:i-siren: {fr ? "Alerte" : "Alert"} — {incident ? L(incident.title, lang) : fr ? "aucune" : "none"}</li>
         </ul>
         <button type="button" className="btn" onClick={onExit}>
           {fr ? "Sortir de l'abri" : "Leave the shelter"}

@@ -78,12 +78,12 @@ const extra = {
   },
 };
 export const RES = {
-  o2: { icon: "💨", color: "#4FD1C5", key: "resO2" }, energy: { icon: "⚡", color: "#F6C945", key: "resEnergy" },
-  food: { icon: "🌱", color: "#7BD389", key: "resFood" }, protection: { icon: "🛡️", color: "#9F7AEA", key: "resProt" },
+  o2: { icon: ":i-wind:", color: "#4FD1C5", key: "resO2" }, energy: { icon: ":i-bolt:", color: "#F6C945", key: "resEnergy" },
+  food: { icon: ":i-sprout:", color: "#7BD389", key: "resFood" }, protection: { icon: ":i-shield:", color: "#9F7AEA", key: "resProt" },
 };
-export const ACT_ICON = { build_solar: "🔆", build_moxie: "💨", build_greenhouse: "🌱", build_shield: "🛡️", emergency_o2: "🫧", emergency_energy: "🔋", emergency_food: "🥫", emergency_protection: "☢️", repair: "🔧", transmit: "📡" };
+export const ACT_ICON = { build_solar: ":i-sun:", build_moxie: ":i-wind:", build_greenhouse: ":i-sprout:", build_shield: ":i-shield:", emergency_o2: ":i-bubbles:", emergency_energy: ":i-battery:", emergency_food: ":i-can:", emergency_protection: ":i-radiation:", repair: ":i-wrench:", transmit: ":i-antenna:" };
 export const MOD_ACTION = { solar: "build_solar", moxie: "build_moxie", greenhouse: "build_greenhouse", shield: "build_shield" };
-export const EVENT_ICON = { dust_storm: "🌪️", solar_flare: "☀️", power_failure: "🔌", oxygen_leak: "💨", food_shortage: "🥀", greenhouse_contam: "🦠", ice_discovery: "🧊", comm_blackout: "📡", life_support_fail: "🫁", calm_sol: "🌅" };
+export const EVENT_ICON = { dust_storm: ":i-storm:", solar_flare: ":i-sun:", power_failure: ":i-plug:", oxygen_leak: ":i-wind:", food_shortage: ":i-wilted:", greenhouse_contam: ":i-microbe:", ice_discovery: ":i-ice:", comm_blackout: ":i-antenna:", life_support_fail: ":i-lungs:", calm_sol: ":i-sunrise:" };
 export function makeT(lang) {
   const base = i18n[lang] || i18n.fr, ex = extra[lang] || extra.fr;
   return (key, p) => { let s = ex[key] ?? base[key] ?? key; if (p) for (const k in p) s = s.replaceAll(`{${k}}`, p[k]); return s; };

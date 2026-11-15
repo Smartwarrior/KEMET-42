@@ -27,6 +27,7 @@ export function stopNovaSpeak() {
  * @param {"fr"|"en"} lang
  */
 export function novaSpeak(text, lang = "fr") {
+  text = String(text || "").replace(/:i-[a-z0-9-]+:/g, "").replace(/\s{2,}/g, " ").trim();
   if (!enabled || !text || typeof window === "undefined") return;
   if (typeof speechSynthesis === "undefined") return;
   try {

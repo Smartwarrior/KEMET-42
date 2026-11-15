@@ -5,6 +5,7 @@
  */
 import { useState, useEffect } from "react";
 import { useCtrl, useGame } from "../game/useStore.js";
+import { DonkiBanner } from "./SafetyWatch.jsx";
 import { audio } from "./audio.js";
 
 const CROPS = [
@@ -12,7 +13,7 @@ const CROPS = [
     id: "lettuce",
     name: "Laitue Rouge Outredgeous",
     enName: "Outredgeous Red Romaine",
-    icon: "🥬",
+    icon: ":i-leafy:",
     cycleDays: "28 jours réels",
     nasaNote: "Première culture consommée par l'équipage de l'ISS en 2015 (système Veggie).",
     src: "NASA Science — Veggie Plant Growth System",
@@ -25,7 +26,7 @@ const CROPS = [
     id: "radish",
     name: "Radis Cherry Belle",
     enName: "Cherry Belle Radish",
-    icon: "🌱",
+    icon: ":i-sprout:",
     cycleDays: "27 jours réels",
     nasaNote: "Testé dans l'Advanced Plant Habitat (APH) de la NASA en 2020.",
     src: "NASA — Radish Harvest in Space (APH-02)",
@@ -38,7 +39,7 @@ const CROPS = [
     id: "zinnia",
     name: "Zinnia",
     enName: "Zinnia",
-    icon: "🌸",
+    icon: ":i-flower:",
     cycleDays: "≈ 60 jours réels",
     nasaNote: "Première fleur cultivée dans Veggie (2016). Sensible à l'humidité dans l'enceinte.",
     src: "NASA — Veggie Zinnia",
@@ -143,8 +144,9 @@ export function SpaceAgriculture({ onClose }) {
   return (
     <div className="screen center agri-modal-screen">
       <div className="panel agri-panel">
+        <DonkiBanner />
         <div className="eyebrow">
-          🌱 {fr ? "SERRE PRESSURISÉE" : "PRESSURIZED GREENHOUSE"} · NASA Veggie / APH
+          :i-sprout: {fr ? "SERRE PRESSURISÉE" : "PRESSURIZED GREENHOUSE"} · NASA Veggie / APH
         </div>
         <h2>
           {fr
@@ -182,11 +184,11 @@ export function SpaceAgriculture({ onClose }) {
         <div className="agri-note">
           <p>{selectedCrop.nasaNote}</p>
           <a href={selectedCrop.url} target="_blank" rel="noreferrer">
-            {selectedCrop.src} ↗
+            {selectedCrop.src} :i-external:
           </a>
           <br />
           <a href="https://www.asc-csa.gc.ca/eng/youth-educators/toolkits/food-production/" target="_blank" rel="noreferrer">
-            {fr ? "Agence spatiale canadienne (CSA) : production d'aliments sur la Lune et en région isolée" : "Canadian Space Agency (CSA): food production on the Moon and in remote areas"} ↗
+            {fr ? "Agence spatiale canadienne (CSA) : production d'aliments sur la Lune et en région isolée" : "Canadian Space Agency (CSA): food production on the Moon and in remote areas"} :i-external:
           </a>
         </div>
 
@@ -220,7 +222,7 @@ export function SpaceAgriculture({ onClose }) {
             {fr ? "Température contrôlée" : "Controlled temperature"}
           </label>
           <p className="mut" style={{ fontSize: 12 }}>
-            ⚡ {fr ? "Énergie base" : "Base power"} : {energy}%
+            :i-bolt: {fr ? "Énergie base" : "Base power"} : {energy}%
             {energy <= 10 ? (fr ? " — insuffisante" : " — too low") : ""}
           </p>
         </div>

@@ -27,22 +27,22 @@ function TopBar() {
   const spent = c.planCost(plan), life = useGame((s) => s.life), delay = useGame((s) => s.commDelayMin), pending = useGame((s) => s.pendingTransmit);
   return (
     <header className="topbar">
-      <div className="brand"><span className="planet">🪐</span><b>KEMET-42</b></div>
+      <div className="brand"><span className="planet">:i-planet:</span><b>KEMET-42</b></div>
       <div className="solbox">
         <div className="sol"><small>{t("sol")}</small> <b>{Math.min(game.day, 30)}</b><span>/30</span></div>
         <div className="pips">{Array.from({ length: 30 }, (_, i) => <i key={i} className={i + 1 < game.day ? "done" : i + 1 === game.day ? "now" : ""} />)}</div>
       </div>
       <div className="stats">
         <div className="signal" title={t("signalEarth")} style={{ fontSize: 12, opacity: 0.9, marginRight: 8 }}>
-          📡 {t("signalEarth")} · {t("signalDelay", { n: delay || 14 })}
+          :i-antenna: {t("signalEarth")} · {t("signalDelay", { n: delay || 14 })}
           {pending ? <small style={{ display: "block", color: "#ffd24a" }}>{t("signalWaiting")}</small> : null}
         </div>
-        <div className="lifebox" title={t("lifeLbl")}><span>❤️</span><div className="lifebar"><i style={{ width: life + "%" }} className={life < 30 ? "crit" : life < 60 ? "warn" : ""} /></div><b>{life}</b></div>
-        <div className="credits" title={t("credits")}>🪙 <b>{game.budget - spent}</b> <small>{spent ? `(−${spent})` : t("credits")}</small></div>
+        <div className="lifebox" title={t("lifeLbl")}><span>:i-heart:</span><div className="lifebar"><i style={{ width: life + "%" }} className={life < 30 ? "crit" : life < 60 ? "warn" : ""} /></div><b>{life}</b></div>
+        <div className="credits" title={t("credits")}>:i-coin: <b>{game.budget - spent}</b> <small>{spent ? `(−${spent})` : t("credits")}</small></div>
       </div>
       <div className="tools">
-        <button className="icon" onClick={() => { audio.click(); document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.(); }} aria-label={t("fullscreen")} title={t("fullscreen")}>⛶</button>
-        <button className="icon" onClick={() => c.store.set({ settings: true })} aria-label={t("settings")}>⚙️</button>
+        <button className="icon" onClick={() => { audio.click(); document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.(); }} aria-label={t("fullscreen")} title={t("fullscreen")}>:i-expand:</button>
+        <button className="icon" onClick={() => c.store.set({ settings: true })} aria-label={t("settings")}>:i-gear:</button>
       </div>
     </header>
   );
@@ -52,10 +52,10 @@ function ServerGauges() {
   const srv = useGame((s) => s.srv), base = useGame((s) => s.srvBase), lang = useGame((s) => s.lang), day = useGame((s) => s.game.day);
   if (!srv) return null; const fr = lang === "fr";
   const cards = [
-    ["🫁", fr ? "Support de vie" : "Life support", `${srv.oxygenKg ?? "—"} kg O₂ · ${srv.waterLiters ?? "—"} L`, Math.min(100 * (srv.oxygenKg ?? 0) / (base?.oxygenKg || 1), 100 * (srv.waterLiters ?? 0) / (base?.waterLiters || 1)), "#5ad6ff"],
-    ["🛡️", fr ? "Protection radiations" : "Radiation shield", `${srv.radiationShield ?? "—"} %`, srv.radiationShield ?? 0, "#b58cff"],
-    ["⚡", fr ? "Énergie" : "Power", `${srv.powerKwh ?? "—"} %`, srv.powerKwh ?? 0, "#ffd24a"],
-    ["🌱", fr ? "Nourriture" : "Food", `${srv.foodKg ?? "—"} kg`, 100 * (srv.foodKg ?? 0) / (base?.foodKg || 1), "#7bdc6a"],
+    [":i-lungs:", fr ? "Support de vie" : "Life support", `${srv.oxygenKg ?? "—"} kg O₂ · ${srv.waterLiters ?? "—"} L`, Math.min(100 * (srv.oxygenKg ?? 0) / (base?.oxygenKg || 1), 100 * (srv.waterLiters ?? 0) / (base?.waterLiters || 1)), "#5ad6ff"],
+    [":i-shield:", fr ? "Protection radiations" : "Radiation shield", `${srv.radiationShield ?? "—"} %`, srv.radiationShield ?? 0, "#b58cff"],
+    [":i-bolt:", fr ? "Énergie" : "Power", `${srv.powerKwh ?? "—"} %`, srv.powerKwh ?? 0, "#ffd24a"],
+    [":i-sprout:", fr ? "Nourriture" : "Food", `${srv.foodKg ?? "—"} kg`, 100 * (srv.foodKg ?? 0) / (base?.foodKg || 1), "#7bdc6a"],
   ];
   return (
     <aside className="gauges" aria-label="status">
@@ -126,7 +126,7 @@ function ServerDock() {
   return (
     <footer className="dock">
       <div className="plan" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-        {err === "next" && <small style={{ color: "#ff8585" }}>⚠ {lang === "fr" ? "Serveur injoignable" : "Server unreachable"}</small>}
+        {err === "next" && <small style={{ color: "#ff8585" }}>:i-alert: {lang === "fr" ? "Serveur injoignable" : "Server unreachable"}</small>}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button
             className="go"
@@ -134,7 +134,7 @@ function ServerDock() {
             onClick={() => { audio.unlock(); audio.ok(); c.nextDayServer(); }}
             style={{ padding: "12px 28px", fontSize: "1.05rem", minHeight: 48, boxShadow: "0 4px 20px rgba(255, 106, 61, 0.4)" }}
           >
-            {lang === "fr" ? `Clôturer le Sol ${day} ▶` : `Complete Sol ${day} ▶`}
+            {lang === "fr" ? `Clôturer le Sol ${day} :i-play:` : `Complete Sol ${day} :i-play:`}
           </button>
         </div>
       </div>
@@ -153,7 +153,7 @@ function Dock() {
       <div className="plan">
         <div className="plan-slots">{[0, 1].map((i) => { const p = plan[i], d = p && c.defOf(p.id); return (
           <div key={i} className={"slot" + (p ? " full" : "")}>{p ? (<><span>{ACT_ICON[p.id]}</span><b>{L(d.name, lang)}</b><em>{d.cost ? `−${d.cost}` : t("free0")}</em><button onClick={() => { audio.click(); c.removePlan(i); }} aria-label={t("cancel")}>✕</button></>) : <small>{t("planSlot", { n: i + 1 })} · {t("planEmpty")}</small>}</div>); })}</div>
-        <button className="go" disabled={locked} onClick={() => { audio.unlock(); audio.ok(); c.endDay(); }}>{plan.length ? t("launchDay") : t("endDay")} ▶</button>
+        <button className="go" disabled={locked} onClick={() => { audio.unlock(); audio.ok(); c.endDay(); }}>{plan.length ? t("launchDay") : t("endDay")} :i-play:</button>
       </div>
       <div className="cards" role="list">
         {groups.map(([lab, type]) => (
@@ -162,7 +162,7 @@ function Dock() {
               const chk = c.canAdd(a.id), n = countIn(a.id), mod = a.moduleType ? (built[a.moduleType] || []).length : 0;
               return (
                 <button key={a.id} role="listitem" className={"card" + (n ? " picked" : "") + (!chk.ok && !n ? " off" : "") + (placing === a.id ? " placing" : "")} onClick={() => click(a)} disabled={locked} title={L(a.description, lang)}>
-                  <span className="ic">{ACT_ICON[a.id]}</span><b>{L(a.name, lang)}</b><em>{a.cost ? `🪙 ${a.cost}` : t("free0")}</em>
+                  <span className="ic">{ACT_ICON[a.id]}</span><b>{L(a.name, lang)}</b><em>{a.cost ? `:i-coin: ${a.cost}` : t("free0")}</em>
                   {a.moduleType && <i className="lvl">{mod}/4</i>}{n > 0 && <i className="badge">{n}</i>}
                   <span className="tip">{L(a.description, lang)}{!chk.ok && !n ? ` — ${t(chk.reason)}` : ""}</span>
                 </button>);
@@ -183,7 +183,7 @@ function MissionCoach() {
   const c = useCtrl(), phase = useGame((s) => s.phase), dest = useGame((s) => s.dest), plan = useGame((s) => s.plan), built = useGame((s) => s.built), lang = useGame((s) => s.lang);
   if (phase !== "plan" || dest !== "mars" || (built.greenhouse || []).length || plan.some((p) => p.id === "build_greenhouse")) return null;
   const fr = lang === "fr";
-  return <aside className="mission-coach"><div className="coach-top"><span className="coach-bot">🤖</span><div><b>{fr ? "NOVA, ton robot copain" : "NOVA, your robot friend"}</b><small>{fr ? "je t'aide" : "I help you"}</small></div><span className="coach-live">LIVE</span></div><p>{fr ? "Le savais-tu ? La NASA fait pousser des salades dans l'espace, dans une boîte spéciale. Sur Mars, il faut aussi une boîte fermée, avec de l'eau et de la lumière." : "Did you know? NASA grows salad in space in a special box. On Mars, you also need a closed box, with water and light."}</p><div className="coach-actions"><button type="button" onClick={() => novaSpeak(fr ? "Les plantes ont besoin d une boite fermee, d eau et de lumiere. Pas dehors !" : "Plants need a closed box, water and light. Not outside!", fr ? "fr" : "en")}>🔊 {fr ? "Écouter NOVA" : "Listen to NOVA"}</button><button onClick={() => { c.openAgriculture?.() || c.suggestGreenhouse(); }}>🌱 {fr ? "Essayer la serre maintenant" : "Try the greenhouse now"}</button><a href="https://science.nasa.gov/mission/veggie/" target="_blank" rel="noreferrer">NASA Veggie ↗</a></div></aside>;
+  return <aside className="mission-coach"><div className="coach-top"><span className="coach-bot">:i-robot:</span><div><b>{fr ? "NOVA, ton robot copain" : "NOVA, your robot friend"}</b><small>{fr ? "je t'aide" : "I help you"}</small></div><span className="coach-live">LIVE</span></div><p>{fr ? "Le savais-tu ? La NASA fait pousser des salades dans l'espace, dans une boîte spéciale. Sur Mars, il faut aussi une boîte fermée, avec de l'eau et de la lumière." : "Did you know? NASA grows salad in space in a special box. On Mars, you also need a closed box, with water and light."}</p><div className="coach-actions"><button type="button" onClick={() => novaSpeak(fr ? "Les plantes ont besoin d une boite fermee, d eau et de lumiere. Pas dehors !" : "Plants need a closed box, water and light. Not outside!", fr ? "fr" : "en")}>:i-speaker: {fr ? "Écouter NOVA" : "Listen to NOVA"}</button><button onClick={() => { c.openAgriculture?.() || c.suggestGreenhouse(); }}>:i-sprout: {fr ? "Essayer la serre maintenant" : "Try the greenhouse now"}</button><a href="https://science.nasa.gov/mission/veggie/" target="_blank" rel="noreferrer">NASA Veggie :i-external:</a></div></aside>;
 }
 
 function DailyMissionTracker() {
@@ -251,7 +251,7 @@ function DailyMissionTracker() {
               ? fr
                 ? "Objectif accompli pour ce Sol !"
                 : "Mission completed for this Sol!"
-              : `${fr ? "Suis le faisceau lumineux" : "Follow the light beam"} · 📍 ${dist}m`}
+              : `${fr ? "Suis le faisceau lumineux" : "Follow the light beam"} · :i-pin: ${dist}m`}
           </span>
         </div>
         {!done && (
@@ -272,7 +272,7 @@ function DailyMissionTracker() {
             }}
             title={fr ? "Écouter NOVA" : "Listen to NOVA"}
           >
-            🔊
+            :i-speaker:
           </button>
         )}
       </div>
@@ -296,7 +296,7 @@ function DailyMissionTracker() {
             cursor: "pointer",
           }}
         >
-          ✨ {fr ? "Interagir avec l'objectif" : "Interact with objective"} ✨
+          :i-sparkles: {fr ? "Interagir avec l'objectif" : "Interact with objective"} :i-sparkles:
         </button>
       )}
     </div>
@@ -307,7 +307,7 @@ function CamButtons() {
   const t = useT(); const [follow, setFollow] = useState(true);
   return (
     <div className="cambtns">
-      <button onClick={() => { audio.click(); rt.cam.follow = !rt.cam.follow; setFollow(rt.cam.follow); }} className={follow ? "on" : ""} title={t("follow")}>🎯<small>{follow ? t("follow") : t("free")}</small></button>
+      <button onClick={() => { audio.click(); rt.cam.follow = !rt.cam.follow; setFollow(rt.cam.follow); }} className={follow ? "on" : ""} title={t("follow")}>:i-target:<small>{follow ? t("follow") : t("free")}</small></button>
       <button onClick={() => { rt.cam.follow = true; setFollow(true); rt.cam.dist = 19; rt.cam.pol = 1.02; }} title={t("recenter")}>⌖</button>
       <button onClick={() => (rt.cam.dist = Math.max(9, rt.cam.dist * 0.8))} title={t("zoomIn")}>＋</button>
       <button onClick={() => (rt.cam.dist = Math.min(60, rt.cam.dist * 1.25))} title={t("zoomOut")}>－</button>
