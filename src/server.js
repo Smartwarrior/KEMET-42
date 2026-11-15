@@ -770,7 +770,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(` Backend KEMET-42 sur http://localhost:${PORT}`);
   console.log(`   Auth     POST /auth/register  POST /auth/login`);
   console.log(`   Scores   POST /scores  GET /scores`);
@@ -788,5 +788,13 @@ app.listen(PORT, () => {
   console.log(`   DONKI    GET  /api/donki`);
   if (!process.env.NASA_API_KEY) {
     console.log(`     NASA_API_KEY non défini → DEMO_KEY (limites de débit). Demande une clé gratuite sur api.nasa.gov`);
+  }
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`ℹ️  Le serveur KEMET-42 tourne déjà sur http://localhost:${PORT} (port déjà actif).`);
+  } else {
+    console.error('Erreur serveur :', err.message);
   }
 });
