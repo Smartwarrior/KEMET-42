@@ -15,7 +15,7 @@ export function Terrain({ onGround, env }) {
     const rnd = (() => { let s = 7; return () => ((s = (s * 16807) % 2147483647) / 2147483647); })();
     const arr = []; let tries = 0;
     while (arr.length < 170 && tries++ < 2000) {
-      const a = rnd() * 6.283, r = 18 + rnd() ** 1.4 * 80, x = Math.cos(a) * r, z = Math.sin(a) * r;
+      const a = rnd() * 6.283, r = 28 + rnd() ** 1.4 * 75, x = Math.cos(a) * r, z = Math.sin(a) * r;
       arr.push({ x, z, y: groundY(x, z), s: 0.25 + rnd() ** 2.5 * 2.4, ry: rnd() * 6, sq: 0.5 + rnd() * 0.6, tone: 0.55 + rnd() * 0.45 });
     }
     return arr;

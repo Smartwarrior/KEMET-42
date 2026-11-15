@@ -44,7 +44,7 @@ export function serverMethods({ store, bus, mission, later, RULES, writeSave, ba
         const game = mkGame(st, s.srvBase, day, hist);
         const alerts = res.alerts; const dust = alerts.some((a) => a.kind === "dust_storm");
         game.status = { dust: dust ? 1 : 0 };
-        store.set({ srv: st, game, srvAlerts: alerts, bonusReached: false, srvError: null });
+        store.set({ srv: st, game, srvAlerts: alerts, bonusReached: false, srvError: null, dailyMissionDone: false, nearMissionTarget: false });
         if (alerts.length) {
           const a = alerts[0], hz = HAZARDS[a.kind] || null;
           store.set({ phase: "accident", pendingEvent: { id: a.kind, negative: true, text: { fr: a.text, en: a.text }, choices: [], factId: null }, choicesReady: false });
@@ -66,7 +66,13 @@ export function serverMethods({ store, bus, mission, later, RULES, writeSave, ba
       const s = g(); const end = evaluateEnd(s.srv, s.game.day, MAX_DAY);
       if (s.life <= 0) return finish({ over: true, success: false }, s.srv, "life");
       if (end.over) return finish(end, s.srv);
-      store.set({ phase: "quiz", quiz: makeQuiz(), pendingEvent: null });
+      // Le quiz scientifique apparaît comme une étape bonus tous les 5 Sols (ou fin de mission)
+      const isQuizDay = s.game.day % 5 === 0;
+      if (isQuizDay) {
+        store.set({ phase: "quiz", quiz: makeQuiz(), pendingEvent: null });
+      } else {
+        store.set({ phase: "plan", pendingEvent: null });
+      }
     },
     async resetServer() { try { await mission.reset(); } catch (_) {} clearTimers(); store.set({ phase: "intro", srv: null, srvBase: null }); },
   };

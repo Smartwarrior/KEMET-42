@@ -57,6 +57,7 @@ export function NovaPanel({
   const [voiceOn, setVoiceOn] = useState(() => isNovaVoiceEnabled());
   const [tip] = useState(() => DID_YOU_KNOW[Math.floor(Math.random() * DID_YOU_KNOW.length)]);
   const [showTip, setShowTip] = useState(false);
+  const [minimized, setMinimized] = useState(false);
 
   const text = helpFor(incident, level, lang);
 
@@ -91,6 +92,19 @@ export function NovaPanel({
     novaSpeak(text, lang);
   }
 
+  if (minimized) {
+    return (
+      <div className="nova-panel nova-mini" role="complementary" aria-label="NOVA" onClick={() => setMinimized(false)}>
+        <span className="nova-avatar" aria-hidden>🤖</span>
+        <b style={{ color: "#4fd1c5" }}>NOVA</b>
+        <button type="button" className="icon" onClick={(e) => { e.stopPropagation(); toggleVoice(); }} title={voiceOn ? "muet" : "voix"}>
+          {voiceOn ? "🔊" : "🔇"}
+        </button>
+        <span style={{ fontSize: 11, color: "#d7e2f5", marginLeft: "auto", cursor: "pointer" }}>▲ {fr ? "Agrandir" : "Expand"}</span>
+      </div>
+    );
+  }
+
   return (
     <div className="nova-panel" role="complementary" aria-label="NOVA">
       <div className="nova-head">
@@ -103,6 +117,9 @@ export function NovaPanel({
         </div>
         <button type="button" className="icon" onClick={toggleVoice} title={voiceOn ? "mute" : "voice"}>
           {voiceOn ? "🔊" : "🔇"}
+        </button>
+        <button type="button" className="icon" onClick={() => setMinimized(true)} title={fr ? "Réduire" : "Minimize"}>
+          —
         </button>
         {onClose && (
           <button type="button" className="icon" onClick={onClose} aria-label="close">×</button>

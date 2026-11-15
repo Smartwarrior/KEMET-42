@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { rt, fxSoft, fxGlow } from "./sim.js";
 import { groundY } from "./terrain.js";
 import { SLOTS, ANTENNA, AIRLOCK } from "../game/layout.js";
+import { getMissionForSol } from "../kemet/dailyMissions.js";
 
 const M = {
   hull: new THREE.MeshStandardMaterial({ color: "#e4e7ee", roughness: 0.78, metalness: 0.08 }),
@@ -173,6 +174,7 @@ export function Modules({ ctrl }) {
         </group>); })}
       {placing && placing.slots.map((s) => { const [x, z] = SLOTS[placing.moduleType][s]; return <SlotMarker key={s} x={x} z={z} color={COLORS[placing.moduleType]} hot={hover === s} onOver={() => setHover(s)} onOut={() => setHover(null)} onPick={() => ctrl.placeAt(s)} type={placing.moduleType} />; })}
       <Beacon />
+      <DailyMissionBeacon ctrl={ctrl} />
       <IceField />
       <Rover />
     </>
@@ -200,6 +202,77 @@ function Beacon() {
   const g = useRef(), ring = useRef(), beam = useRef(); const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: "#ffd24a", transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide }), []);
   useFrame((s) => { const h = rt.hazard; const on = !!(h && h.pos && h.bonus && !h.reached); g.current.visible = on; if (!on) return; const y = groundY(h.pos[0], h.pos[1]); g.current.position.set(h.pos[0], y + 0.1, h.pos[1]); const t = s.clock.elapsedTime; ring.current.scale.setScalar(1 + ((t * 1.2) % 1) * 0.8); mat.opacity = 0.18 + Math.sin(t * 6) * 0.1; });
   return <group ref={g} visible={false}><mesh ref={ring} material={mat} rotation-x={-Math.PI / 2}><ringGeometry args={[1.6, 2.2, 40]} /></mesh><mesh ref={beam} material={mat} position-y={9}><cylinderGeometry args={[0.9, 0.9, 16, 20, 1, true]} /></mesh></group>;
+}
+
+/** Balise 3D pour la mission quotidienne de guidage STEM */
+function DailyMissionBeacon({ ctrl }) {
+  const g = useRef(), ring = useRef(), beam = useRef();
+  const day = ctrl.store.get().game.day || 1;
+  const done = ctrl.store.get().dailyMissionDone;
+  const mission = getMissionForSol(day);
+  const color = mission?.color || "#ffd24a";
+
+  const mat = useMemo(
+    () => new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.35, depthWrite: false, side: THREE.DoubleSide }),
+    [color]
+  );
+
+  useFrame((s, dt) => {
+    if (!g.current || !mission || done) {
+      if (g.current) g.current.visible = false;
+      return;
+    }
+    const [tx, tz] = mission.targetPos;
+    const y = groundY(tx, tz);
+    g.current.visible = true;
+    g.current.position.set(tx, y + 0.1, tz);
+
+    const t = s.clock.elapsedTime;
+    if (ring.current) ring.current.scale.setScalar(1 + ((t * 1.4) % 1) * 1.2);
+    mat.opacity = 0.22 + Math.sin(t * 5) * 0.12;
+
+    // Particules étincelantes au sol
+    if (Math.random() < dt * 6) {
+      fxGlow.emit({
+        x: tx + (Math.random() - 0.5) * 2,
+        y: y + 0.3,
+        z: tz + (Math.random() - 0.5) * 2,
+        vx: 0,
+        vy: 1.5,
+        vz: 0,
+        life: 1.2,
+        s0: 0.25,
+        s1: 0.02,
+        r: 0.9,
+        g: 0.8,
+        b: 0.4,
+      });
+    }
+
+    // Détecte la proximité du commandant (joueur = rt.ents[4])
+    const cmd = rt.ents[4];
+    if (cmd) {
+      const dist = Math.hypot(cmd.x - tx, cmd.z - tz);
+      rt.missionDist = Math.round(dist);
+      const isNear = dist < 3.8;
+      if (rt.nearMission !== isNear) {
+        rt.nearMission = isNear;
+        ctrl.store.set({ nearMissionTarget: isNear });
+      }
+    }
+  });
+
+  return (
+    <group ref={g} visible={false}>
+      <mesh ref={ring} material={mat} rotation-x={-Math.PI / 2}>
+        <ringGeometry args={[1.5, 2.5, 40]} />
+      </mesh>
+      <mesh ref={beam} material={mat} position-y={10}>
+        <cylinderGeometry args={[0.8, 1.2, 20, 20, 1, true]} />
+      </mesh>
+      <pointLight color={color} intensity={8} distance={14} />
+    </group>
+  );
 }
 function IceField() {
   const g = useRef(), m = useMemo(() => new THREE.MeshStandardMaterial({ color: "#bfe8ff", emissive: "#5fb8ff", emissiveIntensity: 0.9, roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9 }), []);

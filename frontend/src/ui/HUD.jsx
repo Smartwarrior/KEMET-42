@@ -7,6 +7,7 @@ import { CREW, CALLSIGN_COLORS, HAZARDS } from "../game/layout.js";
 import { focusCrew } from "../world/interact.js";
 import { audio } from "./audio.js";
 import { novaSpeak } from "./novaSpeak.js";
+import { getMissionForSol } from "../kemet/dailyMissions.js";
 
 export const useT = () => { const lang = useGame((s) => s.lang); return useMemo(() => makeT(lang), [lang]); };
 
@@ -114,10 +115,31 @@ function CrewPanel() {
 }
 
 function ServerDock() {
-  const c = useCtrl(); const phase = useGame((s) => s.phase), lang = useGame((s) => s.lang), err = useGame((s) => s.srvError);
+  const c = useCtrl();
+  const phase = useGame((s) => s.phase);
+  const lang = useGame((s) => s.lang);
+  const err = useGame((s) => s.srvError);
+  const day = useGame((s) => s.game.day || 1);
+
   if (phase !== "plan") return null;
-  return (<footer className="dock"><div className="plan">{err === "next" && <small>⚠ {lang === "fr" ? "Serveur injoignable" : "Server unreachable"}</small>}
-    <button className="go" disabled={phase !== "plan"} onClick={() => { audio.unlock(); audio.ok(); c.nextDayServer(); }}>{lang === "fr" ? "Sol suivant" : "Next sol"} ▶</button></div></footer>);
+
+  return (
+    <footer className="dock">
+      <div className="plan" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+        {err === "next" && <small style={{ color: "#ff8585" }}>⚠ {lang === "fr" ? "Serveur injoignable" : "Server unreachable"}</small>}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            className="go"
+            disabled={phase !== "plan"}
+            onClick={() => { audio.unlock(); audio.ok(); c.nextDayServer(); }}
+            style={{ padding: "12px 28px", fontSize: "1.05rem", minHeight: 48, boxShadow: "0 4px 20px rgba(255, 106, 61, 0.4)" }}
+          >
+            {lang === "fr" ? `Clôturer le Sol ${day} ▶` : `Complete Sol ${day} ▶`}
+          </button>
+        </div>
+      </div>
+    </footer>
+  );
 }
 
 function Dock() {
@@ -162,6 +184,123 @@ function MissionCoach() {
   if (phase !== "plan" || dest !== "mars" || (built.greenhouse || []).length || plan.some((p) => p.id === "build_greenhouse")) return null;
   const fr = lang === "fr";
   return <aside className="mission-coach"><div className="coach-top"><span className="coach-bot">🤖</span><div><b>{fr ? "NOVA, ton robot copain" : "NOVA, your robot friend"}</b><small>{fr ? "je t'aide" : "I help you"}</small></div><span className="coach-live">LIVE</span></div><p>{fr ? "Le savais-tu ? La NASA fait pousser des salades dans l'espace, dans une boîte spéciale. Sur Mars, il faut aussi une boîte fermée, avec de l'eau et de la lumière." : "Did you know? NASA grows salad in space in a special box. On Mars, you also need a closed box, with water and light."}</p><div className="coach-actions"><button type="button" onClick={() => novaSpeak(fr ? "Les plantes ont besoin d une boite fermee, d eau et de lumiere. Pas dehors !" : "Plants need a closed box, water and light. Not outside!", fr ? "fr" : "en")}>🔊 {fr ? "Écouter NOVA" : "Listen to NOVA"}</button><button onClick={() => { c.openAgriculture?.() || c.suggestGreenhouse(); }}>🌱 {fr ? "Essayer la serre maintenant" : "Try the greenhouse now"}</button><a href="https://science.nasa.gov/mission/veggie/" target="_blank" rel="noreferrer">NASA Veggie ↗</a></div></aside>;
+}
+
+function DailyMissionTracker() {
+  const c = useCtrl();
+  const day = useGame((s) => s.game.day || 1);
+  const done = useGame((s) => s.dailyMissionDone);
+  const near = useGame((s) => s.nearMissionTarget);
+  const lang = useGame((s) => s.lang);
+  const phase = useGame((s) => s.phase);
+  const fr = lang === "fr";
+
+  const [dist, setDist] = useState(20);
+
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setDist(rt.missionDist || 20);
+    }, 250);
+    return () => clearInterval(iv);
+  }, []);
+
+  if (phase !== "plan") return null;
+
+  const mission = getMissionForSol(day);
+  if (!mission) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "calc(64px + var(--safe-t, 0px))",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 15,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 6,
+        pointerEvents: "auto",
+        maxWidth: "min(500px, 92vw)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "8px 16px",
+          borderRadius: 999,
+          background: done ? "rgba(22, 101, 52, 0.9)" : "rgba(15, 23, 42, 0.88)",
+          border: `1.5px solid ${done ? "#4ade80" : mission.color}`,
+          boxShadow: `0 8px 24px ${done ? "rgba(34, 197, 94, 0.3)" : "rgba(0,0,0,0.6)"}`,
+          backdropFilter: "blur(10px)",
+          color: "#fff",
+          fontSize: "0.88rem",
+          transition: "all 0.3s ease",
+        }}
+      >
+        <span style={{ fontSize: "1.2rem" }}>{done ? "✓" : mission.icon}</span>
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+          <b style={{ color: done ? "#bbf7d0" : mission.color }}>
+            {fr ? mission.title.fr : mission.title.en}
+          </b>
+          <span style={{ fontSize: "0.74rem", opacity: 0.85 }}>
+            {done
+              ? fr
+                ? "Objectif accompli pour ce Sol !"
+                : "Mission completed for this Sol!"
+              : `${fr ? "Suis le faisceau lumineux" : "Follow the light beam"} · 📍 ${dist}m`}
+          </span>
+        </div>
+        {!done && (
+          <button
+            type="button"
+            onClick={() => novaSpeak(fr ? mission.voice.fr : mission.voice.en, lang)}
+            style={{
+              background: "rgba(255,255,255,0.12)",
+              border: "none",
+              borderRadius: "50%",
+              width: 28,
+              height: 28,
+              cursor: "pointer",
+              display: "grid",
+              placeItems: "center",
+              fontSize: "0.8rem",
+              marginLeft: 4,
+            }}
+            title={fr ? "Écouter NOVA" : "Listen to NOVA"}
+          >
+            🔊
+          </button>
+        )}
+      </div>
+
+      {near && !done && (
+        <button
+          onClick={() => {
+            audio.bonus();
+            c.completeDailyMission();
+          }}
+          style={{
+            animation: "pulse 1.2s infinite",
+            background: `linear-gradient(135deg, ${mission.color}, #ffffff)`,
+            color: "#0f172a",
+            fontWeight: 800,
+            fontSize: "0.95rem",
+            padding: "10px 22px",
+            borderRadius: 999,
+            border: "2px solid #fff",
+            boxShadow: `0 0 20px ${mission.color}`,
+            cursor: "pointer",
+          }}
+        >
+          ✨ {fr ? "Interagir avec l'objectif" : "Interact with objective"} ✨
+        </button>
+      )}
+    </div>
+  );
 }
 
 function CamButtons() {
@@ -232,8 +371,8 @@ function Labels() {
 
 function Toast() {
   const c = useCtrl(), t = useT(); const toast = useGame((s) => s.toast);
-  useEffect(() => { if (!toast) return; audio.error(); const id = setTimeout(() => c.clearToast(), 2200); return () => clearTimeout(id); }, [toast, c]);
-  return toast ? <div className="toast">{t(toast.key)}</div> : null;
+  useEffect(() => { if (!toast) return; audio.ok(); const id = setTimeout(() => c.clearToast(), 3200); return () => clearTimeout(id); }, [toast, c]);
+  return toast ? <div className="toast">{toast.custom || t(toast.key)}</div> : null;
 }
 
 export function HUD() {
@@ -242,7 +381,15 @@ export function HUD() {
   if (!live) return null;
   return (
     <div className="hud">
-      <TopBar /><Gauges /><CrewPanel /><MissionCoach /><PlaceBanner /><CamButtons /><Joystick /><Labels /><Toast />
+      <TopBar />
+      <DailyMissionTracker />
+      <Gauges />
+      <CrewPanel />
+      <PlaceBanner />
+      <CamButtons />
+      <Joystick />
+      <Labels />
+      <Toast />
       <div className="controls">{t("controls")}</div>
       <Dock />
     </div>

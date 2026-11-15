@@ -33,12 +33,17 @@ export function novaSpeak(text, lang = "fr") {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(String(text).replace(/\s+/g, " ").trim());
     u.lang = lang === "en" ? "en-US" : "fr-FR";
-    u.rate = 0.92; // un peu plus lent
-    u.pitch = 1.05;
+    u.rate = 1.0; // Vitesse naturelle standard
+    u.pitch = 1.0; // Tonalité naturelle (évite l'effet robot criard sur Linux/eSpeak)
     u.volume = 1;
-    // Choisir une voix locale si possible
+
+    // Préférer une voix française naturelle / non-robotique si disponible
     const voices = speechSynthesis.getVoices?.() || [];
-    const prefer = voices.find((v) => v.lang?.toLowerCase().startsWith(lang === "en" ? "en" : "fr"));
+    const isLang = (v) => v.lang?.toLowerCase().replace("_", "-").startsWith(lang === "en" ? "en" : "fr");
+    // Préfère voix sans "espeak" ou avec "natural"/"google"
+    const prefer = voices.find((v) => isLang(v) && !v.name?.toLowerCase().includes("espeak") && !v.name?.toLowerCase().includes("klatt"))
+      || voices.find(isLang);
+
     if (prefer) u.voice = prefer;
     speaking = true;
     u.onend = () => { speaking = false; };

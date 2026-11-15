@@ -54,12 +54,11 @@ function Shell({ ctrl }) {
       {phase === "end" && <End />}
       <Settings />
       {agriOpen && <SpaceAgriculture onClose={() => ctrl.closeAgriculture()} />}
-      {(phase === "accident" || phase === "plan") && (
+      {phase === "plan" && (
         <NovaPanel
           lang={lang}
-          incident={phase === "accident" ? incident : null}
-          autoSpeak={phase === "accident"}
-          onStartGreenhouse={phase === "plan" ? () => ctrl.openAgriculture?.() : null}
+          autoSpeak={false}
+          onStartGreenhouse={() => ctrl.openAgriculture?.()}
         />
       )}
     </>

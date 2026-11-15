@@ -9,6 +9,7 @@ import { ACTOR_FOR_ACTION, HAZARDS, SLOT_COUNT } from "./layout.js";
 import { SITES } from "../kemet/facts.js";
 import { forBody } from "../kemet/questions.js";
 import { serverMethods } from "../kemet/serverMode.js";
+import { getMissionForSol } from "../kemet/dailyMissions.js";
 
 export const SAVE_KEY = "mm30_3d_save_v1";
 const BONUS_AMOUNT = 4;
@@ -53,6 +54,7 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
     commDelayMin: 12, pendingTransmit: null, lastChoiceEffects: null,
     assistant: { kind: "welcome", visible: true, completed: false },
     shelterOpen: false, agriOpen: false,
+    dailyMissionDone: false, nearMissionTarget: false,
   });
 
   let rng = createRNG(seed ?? ((Date.now() ^ 0x5eed) >>> 0));
@@ -227,6 +229,40 @@ export function createController({ data: baseData, storage = memoryStorage(), bu
       const s = g(); if (s.phase !== "accident" || s.bonusReached) return false;
       const hz = HAZARDS[s.pendingEvent?.id]; if (!hz?.bonus) return false;
       store.set({ bonusReached: true }); bus.emit("bonus", { hazard: hz }); return true;
+    },
+    completeDailyMission() {
+      const s = g();
+      if (s.dailyMissionDone) return;
+      const m = getMissionForSol(s.game.day || 1);
+      if (!m) return;
+      const rw = m.reward || {};
+      const fr = s.lang === "fr";
+      const curRes = s.game.resources || {};
+      const updatedRes = {
+        ...curRes,
+        o2: Math.min(100, (curRes.o2 || 0) + (rw.o2 || 0)),
+        energy: Math.min(100, (curRes.energy || 0) + (rw.energy || 0)),
+        food: Math.min(100, (curRes.food || 0) + (rw.food || 0)),
+        protection: Math.min(100, (curRes.protection || 0) + (rw.protection || 0)),
+      };
+      if (s.serverMode && s.srv) {
+        const srv = { ...s.srv };
+        if (rw.o2) srv.oxygenKg = Math.min(100, +(srv.oxygenKg + rw.o2).toFixed(1));
+        if (rw.water) srv.waterLiters = Math.min(100, +(srv.waterLiters + rw.water).toFixed(1));
+        if (rw.food) srv.foodKg = Math.min(100, +(srv.foodKg + rw.food).toFixed(1));
+        if (rw.energy) srv.powerKwh = Math.min(100, Math.round(srv.powerKwh + rw.energy));
+        if (rw.protection) srv.radiationShield = Math.min(100, Math.round(srv.radiationShield + rw.protection));
+        store.set({ srv });
+      }
+      const budget = (s.game.budget || 0) + (rw.credits || 0);
+      const game = { ...s.game, resources: updatedRes, budget };
+      const rewardMsg = fr ? m.rewardText.fr : m.rewardText.en;
+      store.set({
+        game,
+        dailyMissionDone: true,
+        toast: { key: "missionSuccess", custom: rewardMsg, t: Date.now() },
+      });
+      bus.emit("dailyMissionDone", { mission: m });
     },
     /** Entrer dans l’abri (tempête / radiation) — chorée 3D + panneau lié aux ressources. */
     enterShelter() {

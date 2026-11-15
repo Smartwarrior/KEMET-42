@@ -75,11 +75,11 @@ function freshMission() {
     destination: null,
     destinationId: null,
     solDay: 0,
-    oxygenKg: 200.0,
-    waterLiters: 600.0,
-    foodKg: 400.0,
-    powerKwh: 100.0,
-    radiationShield: 100,
+    oxygenKg: 100.0,
+    waterLiters: 100.0,
+    foodKg: 100.0,
+    powerKwh: 85.0,
+    radiationShield: 95,
     cargoConfig: [],
     activeAlert: null,
     alerts: [],
@@ -300,21 +300,22 @@ app.post('/api/mission/next-day', async (req, res) => {
   }
 
   const crew = currentMission.crewCount;
-  const o2Used = +(crew * 0.8).toFixed(2);
-  const waterUsed = +(crew * 2.5 * 0.02).toFixed(2); // 98% recycle
-  const foodUsed = +(crew * 1.8).toFixed(2);
+  // Consommation calibrée pour la simulation pédagogique (chaque jauge baisse de façon visible)
+  const o2Used = +(crew * 0.65).toFixed(1);       // ~2.6 kg / Sol pour 4 personnes
+  const waterUsed = +(crew * 0.75).toFixed(1);    // ~3.0 L / Sol
+  const foodUsed = +(crew * 0.85).toFixed(1);     // ~3.4 kg / Sol
 
-  currentMission.oxygenKg = Math.max(0, +(currentMission.oxygenKg - o2Used).toFixed(2));
-  currentMission.waterLiters = Math.max(0, +(currentMission.waterLiters - waterUsed).toFixed(2));
-  currentMission.foodKg = Math.max(0, +(currentMission.foodKg - foodUsed).toFixed(2));
+  currentMission.oxygenKg = Math.max(0, +(currentMission.oxygenKg - o2Used).toFixed(1));
+  currentMission.waterLiters = Math.max(0, +(currentMission.waterLiters - waterUsed).toFixed(1));
+  currentMission.foodKg = Math.max(0, +(currentMission.foodKg - foodUsed).toFixed(1));
   currentMission.solDay += 1;
 
-  // Base power drain
-  let powerDelta = -12;
-  if (currentMission.cargoConfig.includes('cargo_kilopower')) powerDelta += 18;
+  // Drainage de base de l'énergie (nuit martienne vs panneaux de jour)
+  let powerDelta = -7.0;
+  if (currentMission.cargoConfig.includes('cargo_kilopower')) powerDelta += 12;
   if (currentMission.cargoConfig.includes('cargo_greenhouse')) {
-    powerDelta -= 4;
-    if (currentMission.powerKwh > 15) currentMission.foodKg = +(currentMission.foodKg + 8).toFixed(2);
+    powerDelta -= 2;
+    if (currentMission.powerKwh > 20) currentMission.foodKg = +(currentMission.foodKg + 5).toFixed(1);
   }
 
   const alerts = [];

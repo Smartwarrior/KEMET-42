@@ -121,55 +121,100 @@ export function Accident() {
   const evName = (fr ? { dust_storm: "tempête de poussière", solar_flare: "éruption solaire", power_failure: "panne d'énergie", oxygen_leak: "fuite d'oxygène", food_shortage: "pénurie de nourriture", greenhouse_contam: "serre contaminée", comm_blackout: "coupure de communication", ice_discovery: "découverte de glace", life_support_fail: "panne du support de vie", calm_sol: "Sol calme" } : { dust_storm: "dust storm", solar_flare: "solar flare", power_failure: "power failure", oxygen_leak: "oxygen leak", food_shortage: "food shortage", greenhouse_contam: "greenhouse contamination", comm_blackout: "communication blackout", ice_discovery: "ice discovery", life_support_fail: "life support failure", calm_sol: "calm Sol" })[ev.id] || ev.id.replaceAll("_", " ");
   return (
     <div className={"accident" + (ev.negative ? " bad" : " good")}>
-      <div className="acc-banner"><span className="acc-ic">{EVENT_ICON[ev.id] || "⚠"}</span><div><small>{ev.negative ? "⚠ " + t("accident") : "✦ " + t("eventTitle")} · {urgency}</small><p>{L(ev.text, lang)}</p><div className="incident-type">{evName} · {fr ? "protocole guidé" : "guided protocol"}</div></div>
-        <div className="inc-timer" title={fr ? "Compte à rebours = règle de jeu (pas une durée scientifique réelle)" : "Countdown = game rule (not a real scientific duration)"}>
+      <div className="acc-banner">
+        <span className="acc-ic">{EVENT_ICON[ev.id] || "⚠"}</span>
+        <div style={{ flex: 1 }}>
+          <small>{ev.negative ? "⚠ " + t("accident") : "✦ " + t("eventTitle")} · {urgency}</small>
+          <p style={{ fontWeight: 700, fontSize: "1.05rem", margin: "2px 0 4px" }}>{L(ev.text, lang)}</p>
+          <div className="incident-type">{evName} · {fr ? "protocole guidé" : "guided protocol"}</div>
+        </div>
+        <div className="inc-timer" title={fr ? "Compte à rebours = règle de jeu" : "Countdown = game rule"}>
           ⏱ {timeLeft}s
           <small>{fr ? "règle de jeu" : "game rule"}</small>
         </div>
       </div>
+
       {cat && (
-        <div className="incident-meta">
-          <p><strong>{fr ? "Cause" : "Cause"} :</strong> {L(cat.cause, lang)}</p>
-          {cat.phenomenon && <p><strong>{fr ? "Ce qui se passe" : "What is happening"} :</strong> {L(cat.phenomenon, lang)}</p>}
-          <p><strong>{fr ? "Danger" : "Danger"} :</strong> {L(cat.danger, lang)}</p>
-          <p><strong>{fr ? "À faire" : "What to do"} :</strong> {L(cat.whatToDo, lang)}</p>
+        <div className="incident-meta" style={{ background: "rgba(10, 16, 28, 0.85)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "10px 14px" }}>
+          <p style={{ margin: "3px 0" }}><strong>{fr ? "Danger" : "Danger"} :</strong> {L(cat.danger, lang)}</p>
+          <p style={{ margin: "3px 0", color: "#8de8dc" }}><strong>{fr ? "À faire" : "What to do"} :</strong> {L(cat.whatToDo, lang)}</p>
           {cat.source?.url && (
-            <p>
-              <a href={cat.source.url} target="_blank" rel="noreferrer">
-                {cat.source.name || "NASA"} ↗
+            <p style={{ margin: "4px 0 0", fontSize: "0.74rem" }}>
+              <a href={cat.source.url} target="_blank" rel="noreferrer" style={{ color: "#7de8ff" }}>
+                {cat.source.name || "NASA"} ↗ (source officielle NASA)
               </a>
-              <small style={{ marginLeft: 8, opacity: 0.8 }}>
-                {fr ? "(source officielle NASA)" : "(official NASA source)"}
-              </small>
-            </p>
-          )}
-          {!cat.source && (
-            <p>
-              <small style={{ opacity: 0.75 }}>
-                {fr
-                  ? "Règle de jeu : le chrono et certains effets ne sont pas des données scientifiques."
-                  : "Game rule: the timer and some effects are not scientific data."}
-              </small>
             </p>
           )}
         </div>
       )}
-      <div className="incident-protocol"><div className="protocol-head"><b>🤖 NOVA</b><span>{fr ? "étape" : "step"} {activeStep + 1}/3</span></div><div className="protocol-steps">{procedures.map((step, i) => <div key={step} className={"protocol-step " + (i === activeStep ? "active" : i < activeStep ? "done" : "")}><i>{i < activeStep ? "✓" : i + 1}</i><span>{step}</span></div>)}</div>{(ev.id === "dust_storm" || ev.id === "solar_flare" || cat?.shelterRequired || cat?.shelterRecommended) && <button className="shelter-btn" onClick={() => { c.enterShelter?.(); setShelterOpen(true); }}>🏠 {fr ? "Voir l’intérieur de l’abri" : "View shelter interior"}</button>}<small className="protocol-note">{fr ? "Le chrono est une règle du jeu. Les infos sur Mars et la Lune viennent de la NASA." : "The timer is a game rule. Facts about Mars and the Moon come from NASA."}</small></div>
-      {hz?.bonus && <div className={"bonus" + (reached ? " got" : "")}>{reached ? "✔ " + t("intervened", { res }) : "🎯 " + t("intervene", { res })}</div>}
-      {ready && sm && <div className="choices"><div className="choice-row"><button className="choice" onClick={() => { audio.ok(); c.ackAlert(); }}><b>{lang === "fr" ? "Continuer" : "Continue"} ▶</b></button></div></div>}
+
+      <div className="incident-protocol">
+        <div className="protocol-head">
+          <b>🤖 NOVA</b>
+          <span>{fr ? "étape" : "step"} {activeStep + 1}/3</span>
+        </div>
+        <div className="protocol-steps">
+          {procedures.map((step, i) => (
+            <div key={step} className={"protocol-step " + (i === activeStep ? "active" : i < activeStep ? "done" : "")}>
+              <i>{i < activeStep ? "✓" : i + 1}</i>
+              <span>{step}</span>
+            </div>
+          ))}
+        </div>
+        {(ev.id === "dust_storm" || ev.id === "solar_flare" || cat?.shelterRequired || cat?.shelterRecommended) && (
+          <button className="shelter-btn" onClick={() => { c.enterShelter?.(); setShelterOpen(true); }}>
+            🏠 {fr ? "Voir l’intérieur de l’abri" : "View shelter interior"}
+          </button>
+        )}
+      </div>
+
+      {hz?.bonus && (
+        <div className={"bonus" + (reached ? " got" : "")} style={{ margin: "6px auto" }}>
+          {reached ? "✔ " + t("intervened", { res }) : "🎯 " + t("intervene", { res })}
+        </div>
+      )}
+
+      {ready && sm && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 8 }}>
+          <button
+            className="go"
+            style={{ minWidth: 200, padding: "12px 24px", fontSize: "1.05rem" }}
+            onClick={() => { audio.ok(); c.ackAlert(); }}
+          >
+            <b>{lang === "fr" ? "Continuer" : "Continue"} ▶</b>
+          </button>
+        </div>
+      )}
+
       {ready && !sm && (
-        <div className="choices"><small>{t("chooseResponse")}</small><button className="coach-help" onClick={() => setHelpOpen((v) => !v)}>🤖 {helpOpen ? (fr ? "Masquer l’aide" : "Hide help") : (fr ? "NOVA, aide-moi" : "NOVA, help me")}</button>{helpOpen && <div className="help-tip">{cat ? (helpOpen && (fr ? `Indice : ressource en jeu = ${(cat.resources || []).join(", ")}. ${L(cat.whatToDo, lang)}` : `Hint: resource at stake = ${(cat.resources || []).join(", ")}. ${L(cat.whatToDo, lang)}`)) : (ev.id === "power_failure" ? (fr ? "Commence par isoler le circuit." : "Start by isolating the circuit.") : fr ? "Protège d’abord l’équipage, puis regarde le coût." : "Protect the crew first, then check the cost.")}</div>}
-          <div className="choice-row">{ev.choices.map((ch) => {
-            const poor = (ch.cost || 0) > funds && ev.choices.some((o) => !o.cost); const eff = Object.entries(ch.effects || {}).filter(([, v]) => v);
-            return (
-              <button key={ch.id} className={"choice " + (ch.risk || "")} disabled={poor} onClick={() => { audio.ok(); c.chooseEvent(ch.id); }}>
-                <b>{L(ch.label, lang)}</b>
-                <div className="eff">{eff.map(([k, v]) => <span key={k} className={v > 0 ? "up" : "down"} style={{ "--c": RES[k].color }}>{RES[k].icon} {v > 0 ? "+" : ""}{v}</span>)}{ch.status?.name === "dust" && <span className="down">🌪️ {ch.status.days} {lang === "fr" ? "j" : "d"}</span>}</div>
-                <div className="meta"><span>{ch.cost ? `🪙 −${ch.cost}` : t("free0")}</span><span className={"risk " + ch.risk}>{t("risk_" + (ch.risk || "low"))}</span></div>
-                {poor && <em>{t("noFunds")}</em>}
-              </button>);
-          })}</div>
-        </div>)}
+        <div className="choices">
+          <small>{t("chooseResponse")}</small>
+          <button className="coach-help" onClick={() => setHelpOpen((v) => !v)}>
+            🤖 {helpOpen ? (fr ? "Masquer l’aide" : "Hide help") : (fr ? "NOVA, aide-moi" : "NOVA, help me")}
+          </button>
+          {helpOpen && (
+            <div className="help-tip">
+              {cat
+                ? fr ? `Indice : ${L(cat.whatToDo, lang)}` : `Hint: ${L(cat.whatToDo, lang)}`
+                : fr ? "Protège d'abord l'équipage." : "Protect crew first."}
+            </div>
+          )}
+          <div className="choice-row">
+            {ev.choices.map((ch) => {
+              const poor = (ch.cost || 0) > funds && ev.choices.some((o) => !o.cost);
+              const eff = Object.entries(ch.effects || {}).filter(([, v]) => v);
+              return (
+                <button key={ch.id} className={"choice " + (ch.risk || "")} disabled={poor} onClick={() => { audio.ok(); c.chooseEvent(ch.id); }}>
+                  <b>{L(ch.label, lang)}</b>
+                  <div className="eff">{eff.map(([k, v]) => <span key={k} className={v > 0 ? "up" : "down"} style={{ "--c": RES[k].color }}>{RES[k].icon} {v > 0 ? "+" : ""}{v}</span>)}</div>
+                  <div className="meta"><span>{ch.cost ? `🪙 −${ch.cost}` : t("free0")}</span><span className={"risk " + ch.risk}>{t("risk_" + (ch.risk || "low"))}</span></div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {shelterOpen && <ShelterView event={ev} onClose={() => setShelterOpen(false)} />}
     </div>
   );
