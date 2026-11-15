@@ -175,9 +175,9 @@ export function Destination() {
             </tbody>
           </table>
           <p className="compare-sources">
-            <a href={moon.src.url} target="_blank" rel="noreferrer">{moon.src.name}</a>
+            {moon?.src && <a href={moon.src.url} target="_blank" rel="noreferrer">{moon.src.name}</a>}
             {" · "}
-            <a href={mars.src.url} target="_blank" rel="noreferrer">{mars.src.name}</a>
+            {mars?.src && <a href={mars.src.url} target="_blank" rel="noreferrer">{mars.src.name}</a>}
             {" · "}
             <a href="https://www.nasa.gov/artemis/" target="_blank" rel="noreferrer">NASA Artemis</a>
             {" · "}

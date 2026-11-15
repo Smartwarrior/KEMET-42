@@ -52,16 +52,30 @@ function ServerGauges() {
   const srv = useGame((s) => s.srv), base = useGame((s) => s.srvBase), lang = useGame((s) => s.lang), day = useGame((s) => s.game.day);
   if (!srv) return null; const fr = lang === "fr";
   const cards = [
-    [":i-lungs:", fr ? "Support de vie" : "Life support", `${srv.oxygenKg ?? "—"} kg O₂ · ${srv.waterLiters ?? "—"} L`, Math.min(100 * (srv.oxygenKg ?? 0) / (base?.oxygenKg || 1), 100 * (srv.waterLiters ?? 0) / (base?.waterLiters || 1)), "#5ad6ff"],
-    [":i-shield:", fr ? "Protection radiations" : "Radiation shield", `${srv.radiationShield ?? "—"} %`, srv.radiationShield ?? 0, "#b58cff"],
+    [":i-lungs:", fr ? "Support de vie" : "Life support", `${srv.oxygenKg ?? "—"} kg · ${srv.waterLiters ?? "—"} L`, Math.min(100 * (srv.oxygenKg ?? 0) / (base?.oxygenKg || 1), 100 * (srv.waterLiters ?? 0) / (base?.waterLiters || 1)), "#5ad6ff"],
+    [":i-shield:", fr ? "Protection" : "Radiation shield", `${srv.radiationShield ?? "—"} %`, srv.radiationShield ?? 0, "#b58cff"],
     [":i-bolt:", fr ? "Énergie" : "Power", `${srv.powerKwh ?? "—"} %`, srv.powerKwh ?? 0, "#ffd24a"],
     [":i-sprout:", fr ? "Nourriture" : "Food", `${srv.foodKg ?? "—"} kg`, 100 * (srv.foodKg ?? 0) / (base?.foodKg || 1), "#7bdc6a"],
   ];
   return (
     <aside className="gauges" aria-label="status">
-      {cards.map(([ic, name, val, pct, col]) => { const v = Math.max(0, Math.min(100, Math.round(pct))), cls = v < 20 ? "crit" : v < 40 ? "warn" : ""; return (
-        <div key={name} className={"gauge " + cls} style={{ "--c": col }}><div className="g-head"><span className="g-ic">{ic}</span><span className="g-name">{name}</span><b className="g-val" style={{ fontSize: 13 }}>{val}</b></div><div className="bar"><i style={{ width: v + "%" }} /></div></div>); })}
-      <div className="mut" style={{ fontSize: 11 }}>{fr ? "Sol" : "Sol"} {day} · backend KEMET-42</div>
+      {cards.map(([ic, name, val, pct, col]) => {
+        const v = Math.max(0, Math.min(100, Math.round(pct))), cls = v < 20 ? "crit" : v < 40 ? "warn" : "";
+        return (
+          <div key={name} className={"gauge " + cls} style={{ "--c": col }}>
+            <div className="g-head">
+              <span className="g-ic">{ic}</span>
+              <span className="g-name">{name}</span>
+              <b className="g-val">
+                <span className="g-val-full">{val}</span>
+                <span className="g-val-pct">{v}%</span>
+              </b>
+            </div>
+            <div className="bar"><i style={{ width: v + "%" }} /></div>
+          </div>
+        );
+      })}
+      <div className="mut g-sol-sub" style={{ fontSize: 11 }}>{fr ? "Sol" : "Sol"} {day} · backend KEMET-42</div>
     </aside>
   );
 }

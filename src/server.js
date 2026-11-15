@@ -793,7 +793,7 @@ const server = app.listen(PORT, () => {
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.log(`ℹ️  Le serveur KEMET-42 tourne déjà sur http://localhost:${PORT} (port déjà actif).`);
+    console.log(`[info] Le serveur KEMET-42 tourne déjà sur http://localhost:${PORT} (port déjà actif).`);
   } else {
     console.error('Erreur serveur :', err.message);
   }

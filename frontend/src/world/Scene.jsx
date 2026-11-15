@@ -41,7 +41,7 @@ function Governor({ onLow }) {
 function Inner({ ctrl, onLow, quality, env }) {
   useKeyboard();
   const { gl, camera } = useThree();
-  useEffect(() => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.0; gl.outputColorSpace = THREE.SRGBColorSpace; camera.far = 900; camera.updateProjectionMatrix(); }, [gl, camera]);
+  useEffect(() => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.0; gl.outputColorSpace = THREE.SRGBColorSpace; }, [gl]);
   const onGround = (p) => {
     const c = rt.ents[4]; if (!c || ctrl.store.get().phase === "intro") return;
     if (ctrl.store.get().placing) return;
